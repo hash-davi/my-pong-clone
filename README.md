@@ -1,2 +1,5 @@
-# my-pong-clone
-My attempt at cloning Pong by using the LÖVE framework for Lua.
+# My Pong Clone
+
+## DISCLAIMER
+
+This is actually my first time using Lua and the LÖVE framework. Thus, I do not have any prior experience at making games.
