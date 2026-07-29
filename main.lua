@@ -27,6 +27,16 @@ function love.keypressed(key)
 	end
 end
 
+function showscore(player, x, y)
+	if player == 1 then
+		score = player1_score
+	elseif player == 2 then
+		score = player2_score
+	end
+
+	love.graphics.print(tostring(score), x, y)
+end
+
 ----------------------------------------------------------
 
 -- Main functions ----------------------------------------
@@ -162,11 +172,11 @@ function love.draw()
 			love.graphics.printf("Player 2's serve", 0, 30, VIRTUAL_WIDTH, "center")
 		end
 
-		love.graphics.print(tostring(player1_score), VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
-		love.graphics.print(tostring(player2_score), VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
+		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
 	elseif game_state == "game" then
-		love.graphics.print(tostring(player1_score), VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
-		love.graphics.print(tostring(player2_score), VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
+		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
 	elseif game_state == "result" then
 		if server == 1 then
 			love.graphics.printf("Player 1 won!", 0, 30, VIRTUAL_WIDTH, "center")
@@ -174,8 +184,8 @@ function love.draw()
 			love.graphics.printf("Player 2 won!", 0, 30, VIRTUAL_WIDTH, "center")
 		end
 
-		love.graphics.print(tostring(player1_score), VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
-		love.graphics.print(tostring(player2_score), VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
+		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
 	end
 
 	love.graphics.rectangle("fill", player1_x, player1_y, 10, 30)
