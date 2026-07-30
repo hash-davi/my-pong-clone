@@ -1,8 +1,8 @@
-require("classic")
-
-require("Paddle")
+Class = require("class")
 
 push = require("push")
+
+require("Paddle")
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
