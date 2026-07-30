@@ -6,7 +6,7 @@ function Paddle:init(x, y, width, height, player)
 	self.width = width
 	self.height = height
 	self.player = player
-	self.dy = PLAYER_VELOCITY
+	self.dy = 0
 end
 
 function Paddle:render()
@@ -14,19 +14,9 @@ function Paddle:render()
 end
 
 function Paddle:update(dt)
-	if self.player == 1 then
-		if love.keyboard.isDown("w") then
-			self.y = math.max(self.y - self.dy * dt, TOP_WALL)
-		end
-		if love.keyboard.isDown("s") then
-			self.y = math.min(self.y + self.dy * dt, BOTTOM_WALL)
-		end
-	elseif self.player == 2 then
-		if love.keyboard.isDown("up") then
-			self.y = math.max(self.y - self.dy * dt, TOP_WALL)
-		end
-		if love.keyboard.isDown("down") then
-			self.y = math.min(self.y + self.dy * dt, BOTTOM_WALL)
-		end
+	if self.dy < 0 then
+		self.y = math.max(self.y + self.dy * dt, TOP_WALL)
+	else
+		self.y = math.min(self.y + self.dy * dt, BOTTOM_WALL - self.height + 10)
 	end
 end

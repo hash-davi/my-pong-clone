@@ -15,7 +15,7 @@ VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
 
 TOP_WALL = 15
-BOTTOM_WALL = VIRTUAL_HEIGHT - 45
+BOTTOM_WALL = VIRTUAL_HEIGHT - 25
 
 PLAYER_VELOCITY = 200
 BALL_DX = 100
@@ -70,15 +70,17 @@ function love.load()
 
 	push.setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, { upscale = "normal" })
 
+	hit_sound = love.audio.newSource("./assets/sound.wav", "static")
+
 	game_state = "menu"
 	server = 1
 
 	-- Player 1 Atributes --------
-	player1 = Paddle(10, 15, 10, 30, 1)
+	player1 = Paddle(10, TOP_WALL, 10, 30, 1)
 	player1_score = 0
 
 	-- Player 2 Atributes --------
-	player2 = Paddle(VIRTUAL_WIDTH - 20, BOTTOM_WALL, 10, 30, 2)
+	player2 = Paddle(VIRTUAL_WIDTH - 20, BOTTOM_WALL - 20, 10, 30, 2)
 	player2_score = 0
 
 	-- Ball Atributes ------------
@@ -88,25 +90,46 @@ end
 -- Update -------------------
 function love.update(dt)
 	-- Player 1 ------
+	if love.keyboard.isDown("w") then
+		player1.dy = -PLAYER_VELOCITY
+	elseif love.keyboard.isDown("s") then
+		player1.dy = PLAYER_VELOCITY
+	else
+		player1.dy = 0
+	end
+
 	player1:update(dt)
 
 	-- Player 2 ------
+	if love.keyboard.isDown("up") then
+		player2.dy = -PLAYER_VELOCITY
+	elseif love.keyboard.isDown("down") then
+		player2.dy = PLAYER_VELOCITY
+	else
+		player2.dy = 0
+	end
+
 	player2:update(dt)
 
 	if game_state == "menu" then
 		player1_score = 0
 		player2_score = 0
 	elseif game_state == "game" then
-		-- Movement ----------
-
-		-- Ball ----------
-		ball:update(dt)
-
-		if Ball:collidesWith(player1) then
+		-- Ball --------------
+		if ball:collidesWith(player1) then
 			ball.dx = -ball.dx * 1.05
-		elseif Ball:collidesWith(player2) then
-			ball.dx = -ball.dx * 1.05
+			ball.x = player1.x + ball.width + 1
+
+			love.audio.play(hit_sound)
 		end
+		if ball:collidesWith(player2) then
+			ball.dx = -ball.dx * 1.05
+			ball.x = player2.x - ball.width - 1
+
+			love.audio.play("./assets/sound.wav")
+		end
+
+		ball:update(dt)
 
 		-- Scoring -----------
 		if ball.x < player1.x then
