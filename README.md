@@ -7,4 +7,6 @@ This is actually my first time using Lua and the LÖVE framework. Thus, I do not
 
 ## Current state of the game
 
-![](./assets/first_video_demonstration.mp4)
+<video width="320" height="240" controls>
+  <source src="video.mov" type="video/mp4">
+</video>
