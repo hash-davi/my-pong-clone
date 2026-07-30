@@ -71,8 +71,8 @@ function love.load()
 	push.setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, { upscale = "normal" })
 
 	sounds = {
-		["hit_sound"] = love.audio.newSource("assets/sound.wav", "static"),
-		["score_sound"] = love.audio.newSource("assets/score.wav", "static"),
+		["hit_sound"] = love.audio.newSource("sounds/sound.wav", "static"),
+		["score_sound"] = love.audio.newSource("sounds/score.wav", "static"),
 	}
 
 	game_state = "menu"
