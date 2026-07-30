@@ -70,7 +70,10 @@ function love.load()
 
 	push.setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, { upscale = "normal" })
 
-	hit_sound = love.audio.newSource("./assets/sound.wav", "static")
+	sounds = {
+		["hit_sound"] = love.audio.newSource("assets/sound.wav", "static"),
+		["score_sound"] = love.audio.newSource("assets/score.wav", "static"),
+	}
 
 	game_state = "menu"
 	server = 1
@@ -120,13 +123,18 @@ function love.update(dt)
 			ball.dx = -ball.dx * 1.05
 			ball.x = player1.x + ball.width + 1
 
-			love.audio.play(hit_sound)
+			love.audio.play(sounds["hit_sound"])
 		end
 		if ball:collidesWith(player2) then
 			ball.dx = -ball.dx * 1.05
 			ball.x = player2.x - ball.width - 1
 
-			love.audio.play("./assets/sound.wav")
+			love.audio.play(sounds["hit_sound"])
+		end
+
+		if ball.y >= BOTTOM_WALL or ball.y <= TOP_WALL then
+			ball.dy = -ball.dy
+			love.audio.play(sounds["hit_sound"])
 		end
 
 		ball:update(dt)
@@ -135,10 +143,14 @@ function love.update(dt)
 		if ball.x < player1.x then
 			player2_score = player2_score + 1
 
+			love.audio.play(sounds["score_sound"])
+
 			server = 2
 			game_state = "serve"
 		elseif ball.x > player2.x then
 			player1_score = player1_score + 1
+
+			love.audio.play(sounds["score_sound"])
 
 			server = 1
 			game_state = "serve"
