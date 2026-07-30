@@ -1,8 +1,12 @@
+-- Modules importing and constants definitions -----------
+
 Class = require("class")
 
 push = require("push")
 
 require("Paddle")
+
+require("Ball")
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -10,8 +14,13 @@ WINDOW_HEIGHT = 720
 VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
 
+TOP_WALL = 15
+BOTTOM_WALL = VIRTUAL_HEIGHT - 45
+
 PLAYER_VELOCITY = 200
-BALL_X_VELOCITY = 100
+BALL_DX = 100
+
+----------------------------------------------------------
 
 -- Auxiliary functions -----------------------------------
 
@@ -65,42 +74,24 @@ function love.load()
 	server = 1
 
 	-- Player 1 Atributes --------
-	-- player1_x = 10
-	-- player1_y = 200
-	player1 = Paddle(10, 200, 10, 30)
+	player1 = Paddle(10, 15, 10, 30, 1)
 	player1_score = 0
 
 	-- Player 2 Atributes --------
-	player2_x = VIRTUAL_WIDTH - 20
-	player2_y = 200
+	player2 = Paddle(VIRTUAL_WIDTH - 20, BOTTOM_WALL, 10, 30, 2)
 	player2_score = 0
 
 	-- Ball Atributes ------------
-	ball_x = 201
-	ball_y = VIRTUAL_HEIGHT / 2
-	ball_x_velocity = 100
-	ball_y_velocity = 50
+	ball = Ball(201, VIRTUAL_HEIGHT / 2, 10, 10)
 end
 
 -- Update -------------------
 function love.update(dt)
 	-- Player 1 ------
-	-- if love.keyboard.isDown("w") then
-	-- 	player1_y = math.max(player1_y - 200 * dt, 15)
-	-- end
-	-- if love.keyboard.isDown("s") then
-	-- 	player1_y = math.min(player1_y + 200 * dt, VIRTUAL_HEIGHT - 45)
-	-- end
-
 	player1:update(dt)
 
 	-- Player 2 ------
-	if love.keyboard.isDown("up") then
-		player2_y = math.max(player2_y - 200 * dt, 15)
-	end
-	if love.keyboard.isDown("down") then
-		player2_y = math.min(player2_y + 200 * dt, VIRTUAL_HEIGHT - 45)
-	end
+	player2:update(dt)
 
 	if game_state == "menu" then
 		player1_score = 0
@@ -109,31 +100,21 @@ function love.update(dt)
 		-- Movement ----------
 
 		-- Ball ----------
-		ball_x = ball_x + ball_x_velocity * dt
-		ball_y = ball_y + ball_y_velocity * dt
+		ball:update(dt)
 
-		if ball_x >= player2_x - 10 and ball_y < player2_y + 30 and ball_y + 10 > player2_y then
-			ball_x_velocity = -ball_x_velocity * 1.05
-			ball_x = ball_x - 5
-		end
-
-		if ball_x <= player1_x + 10 and ball_y < player1_y + 30 and ball_y + 10 > player1_y then
-			ball_x_velocity = -ball_x_velocity * 1.05
-			ball_x = ball_x + 5
-		end
-
-		if ball_y >= VIRTUAL_HEIGHT - 25 or ball_y <= 15 then
-			ball_y_velocity = -ball_y_velocity
+		if Ball:collidesWith(player1) then
+			ball.dx = -ball.dx * 1.05
+		elseif Ball:collidesWith(player2) then
+			ball.dx = -ball.dx * 1.05
 		end
 
 		-- Scoring -----------
-
-		if ball_x < player1_x then
+		if ball.x < player1.x then
 			player2_score = player2_score + 1
 
 			server = 2
 			game_state = "serve"
-		elseif ball_x > player2_x then
+		elseif ball.x > player2.x then
 			player1_score = player1_score + 1
 
 			server = 1
@@ -144,20 +125,15 @@ function love.update(dt)
 			game_state = "result"
 		end
 	elseif game_state == "serve" then
-		ball_x = 201
-		ball_y = VIRTUAL_HEIGHT / 2
+		ball:reset()
 
 		if server == 1 then
-			ball_x_velocity = math.abs(BALL_X_VELOCITY)
-			ball_y_velocity = math.random(-50, 50)
+			ball.dx = BALL_DX
 		elseif server == 2 then
-			ball_x_velocity = -math.abs(BALL_X_VELOCITY)
-			ball_y_velocity = math.random(-50, 50)
+			ball.dx = -BALL_DX
 		end
 	elseif game_state == "result" then
-		ball_x = 201
-		ball_y = VIRTUAL_HEIGHT / 2
-		ball_x_velocity = BALL_X_VELOCITY
+		ball:reset()
 	end
 end
 
@@ -195,11 +171,10 @@ function love.draw()
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
 	end
 
-	-- love.graphics.rectangle("fill", player1_x, player1_y, 10, 30)
 	player1:render()
-	love.graphics.rectangle("fill", player2_x, player2_y, 10, 30)
+	player2:render()
 
-	love.graphics.rectangle("fill", ball_x, ball_y, 10, 10)
+	ball:render()
 
 	push.finish()
 end
