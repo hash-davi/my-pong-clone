@@ -1,3 +1,7 @@
+require("classic")
+
+require("Paddle")
+
 push = require("push")
 
 WINDOW_WIDTH = 1280
@@ -61,8 +65,9 @@ function love.load()
 	server = 1
 
 	-- Player 1 Atributes --------
-	player1_x = 10
-	player1_y = 200
+	-- player1_x = 10
+	-- player1_y = 200
+	player1 = Paddle(10, 200, 10, 30)
 	player1_score = 0
 
 	-- Player 2 Atributes --------
@@ -80,12 +85,14 @@ end
 -- Update -------------------
 function love.update(dt)
 	-- Player 1 ------
-	if love.keyboard.isDown("w") then
-		player1_y = math.max(player1_y - 200 * dt, 15)
-	end
-	if love.keyboard.isDown("s") then
-		player1_y = math.min(player1_y + 200 * dt, VIRTUAL_HEIGHT - 45)
-	end
+	-- if love.keyboard.isDown("w") then
+	-- 	player1_y = math.max(player1_y - 200 * dt, 15)
+	-- end
+	-- if love.keyboard.isDown("s") then
+	-- 	player1_y = math.min(player1_y + 200 * dt, VIRTUAL_HEIGHT - 45)
+	-- end
+
+	player1:update(dt)
 
 	-- Player 2 ------
 	if love.keyboard.isDown("up") then
@@ -188,7 +195,8 @@ function love.draw()
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
 	end
 
-	love.graphics.rectangle("fill", player1_x, player1_y, 10, 30)
+	-- love.graphics.rectangle("fill", player1_x, player1_y, 10, 30)
+	player1:render()
 	love.graphics.rectangle("fill", player2_x, player2_y, 10, 30)
 
 	love.graphics.rectangle("fill", ball_x, ball_y, 10, 10)
