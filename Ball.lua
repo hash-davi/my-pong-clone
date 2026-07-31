@@ -7,10 +7,16 @@ function Ball:init(x, y, width, height)
 	self.height = height
 
 	self.dx = BALL_DX
-	self.dy = math.random(2) == 1 and -100 or 100
+	self.dy = 0
 end
 
 function Ball:update(dt)
+	if self.dx > 0 then
+		self.dx = math.max(self.dx - GRAVITY * dt, BALL_DX)
+	elseif self.dx < 0 then
+		self.dx = math.min(self.dx + GRAVITY * dt, -BALL_DX)
+	end
+
 	self.x = self.x + self.dx * dt
 	self.y = self.y + self.dy * dt
 end
@@ -35,5 +41,5 @@ function Ball:reset()
 	self.x = 201
 	self.y = VIRTUAL_HEIGHT / 2
 	self.dx = BALL_DX
-	self.dy = math.random(-50, 50)
+	self.dy = math.random(-100, 100)
 end
