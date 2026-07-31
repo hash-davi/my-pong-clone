@@ -7,4 +7,4 @@ This is actually my first time using Lua and the LÖVE framework. Thus, I do not
 
 ## Current state of the game
 
-https://github.com/user-attachments/assets/64e0a939-8f97-484c-a6d7-31d9346eea54
+https://github.com/user-attachments/assets/7c1040e6-654a-4980-af55-1ebd0003bea6
