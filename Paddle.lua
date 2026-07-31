@@ -7,7 +7,6 @@ function Paddle:init(x, y, width, height, playable)
 	self.height = height
 	self.playable = playable
 	self.dy = 0
-	self.ddy = PLAYER_ACCELERATION
 
 	self.state = "static"
 end
@@ -20,12 +19,6 @@ function Paddle:update(dt)
 	self.state = self.dy == 0 and "static" or "moving"
 
 	if self.state == "moving" then
-		-- if self.dy < 0 then
-		-- 	self.dy = math.max(self.dy - self.ddy * dt, -PLAYER_VELOCITY)
-		-- else
-		-- 	self.dy = math.min(self.dy + self.ddy * dt, PLAYER_VELOCITY)
-		-- end
-
 		if self.dy < 0 then
 			self.y = math.max(self.y + self.dy * dt, TOP_WALL)
 		else
@@ -52,10 +45,10 @@ function Paddle:track(ball)
 
 	local paddle_sy = final_position.y - (self.y + self.height / 2)
 
-	if paddle_sy > 0 then
-		self.dy = math.min(paddle_sy / ball_dt - math.random(-10, 10), 100)
-	elseif paddle_sy < 0 then
-		self.dy = math.max(paddle_sy / ball_dt - math.random(-10, 10), -100)
+	if paddle_sy > 0 then -- If the ball will fall below the paddle
+		self.dy = math.min(paddle_sy / ball_dt, PLAYER_VELOCITY)
+	elseif paddle_sy < 0 then -- If the ball will fall above the paddle
+		self.dy = math.max((paddle_sy - ball.height) / ball_dt, -PLAYER_VELOCITY)
 	else
 		self.dy = 0
 	end

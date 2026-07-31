@@ -18,9 +18,7 @@ TOP_WALL = 15
 BOTTOM_WALL = VIRTUAL_HEIGHT - 25
 
 PLAYER_VELOCITY = 200
-PLAYER_ACCELERATION = 105
 BALL_DX = 100
-GRAVITY = 50
 
 ----------------------------------------------------------
 
@@ -33,11 +31,23 @@ function love.keypressed(key)
 
 	if key == "return" then
 		if game_state == "menu" then
-			game_state = "serve"
+			if player1.playable or player2.playable then
+				game_state = "serve"
+			end
 		elseif game_state == "serve" then
 			game_state = "game"
 		elseif game_state == "result" then
 			game_state = "menu"
+		end
+	end
+
+	if game_state == "menu" then
+		if key == "w" then
+			player1.playable = true
+		end
+
+		if key == "up" then
+			player2.playable = true
 		end
 	end
 end
@@ -81,7 +91,7 @@ function love.load()
 	server = 1
 
 	-- Player 1 Atributes --------
-	player1 = Paddle(10, TOP_WALL, 10, 30, true)
+	player1 = Paddle(10, TOP_WALL, 10, 30, false)
 	player1_score = 0
 
 	-- Player 2 Atributes --------
@@ -97,17 +107,9 @@ function love.update(dt)
 	-- Left paddle ------
 	if player1.playable then
 		if love.keyboard.isDown("w") then
-			if player1.dy >= 0 then
-				player1.dy = -PLAYER_VELOCITY -- / 3)
-			else
-				player1.dy = -math.abs(player1.dy)
-			end
+			player1.dy = -PLAYER_VELOCITY
 		elseif love.keyboard.isDown("s") then
-			if player1.dy <= 0 then
-				player1.dy = PLAYER_VELOCITY -- / 3
-			else
-				player1.dy = player1.dy
-			end
+			player1.dy = PLAYER_VELOCITY
 		else
 			player1.dy = 0
 			player1.state = "static"
@@ -124,6 +126,7 @@ function love.update(dt)
 			player2.dy = PLAYER_VELOCITY
 		else
 			player2.dy = 0
+			player2.state = "static"
 		end
 	end
 
@@ -134,6 +137,14 @@ function love.update(dt)
 		player2_score = 0
 	elseif game_state == "game" then
 		-- Unplayable paddle -
+		if not player1.playable then
+			if ball.dx < 0 then
+				player1:track(ball)
+			else
+				player1.dy = 0
+			end
+		end
+
 		if not player2.playable then
 			if ball.dx > 0 then
 				player2:track(ball)
@@ -144,14 +155,14 @@ function love.update(dt)
 
 		-- Ball --------------
 		if ball:collidesWith(player1) then
-			ball.dx = -ball.dx * 1.05
+			ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
 			ball.dy = ball.dy + player1.dy / 2
 			ball.x = player1.x + ball.width + 1
 
 			love.audio.play(sounds["hit_sound"])
 		end
 		if ball:collidesWith(player2) then
-			ball.dx = -ball.dx * 1.05
+			ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
 			ball.dy = ball.dy + player2.dy / 2
 			ball.x = player2.x - ball.width - 1
 
@@ -234,8 +245,6 @@ function love.draw()
 
 	player1:render()
 	player2:render()
-
-	-- love.graphics.print(tostring(player1.dy), 30, 30)
 
 	ball:render()
 

@@ -11,12 +11,6 @@ function Ball:init(x, y, width, height)
 end
 
 function Ball:update(dt)
-	if self.dx > 0 then
-		self.dx = math.max(self.dx - GRAVITY * dt, BALL_DX)
-	elseif self.dx < 0 then
-		self.dx = math.min(self.dx + GRAVITY * dt, -BALL_DX)
-	end
-
 	self.x = self.x + self.dx * dt
 	self.y = self.y + self.dy * dt
 end
