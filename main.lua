@@ -2,7 +2,9 @@
 
 Class = require("class")
 
-push = require("push")
+local push = require("push")
+
+require("Menu")
 
 require("Paddle")
 
@@ -41,12 +43,12 @@ function love.keypressed(key)
 		end
 	end
 
-	if game_state == "menu" then
-		if key == "w" then
+	if game_state == "serve" then
+		if key == "w" or key == "s" then
 			player1.playable = true
 		end
 
-		if key == "up" then
+		if key == "up" or key == "down" then
 			player2.playable = true
 		end
 	end
@@ -74,6 +76,8 @@ function love.load()
 
 	score_font = love.graphics.newFont("font.ttf", 32)
 
+	love.window.setTitle("My Pong")
+
 	love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, {
 		resizable = false,
 		vsync = true,
@@ -100,6 +104,8 @@ function love.load()
 
 	-- Ball Atributes ------------
 	ball = Ball(201, VIRTUAL_HEIGHT / 2, 10, 10)
+
+	menu = Menu()
 end
 
 -- Update -------------------
@@ -220,6 +226,8 @@ function love.draw()
 
 	if game_state == "menu" then
 		love.graphics.printf("Welcome to Pong", 0, 60, VIRTUAL_WIDTH, "center")
+		love.graphics.printf("Press return to play", 0, VIRTUAL_HEIGHT - 80, VIRTUAL_WIDTH, "center")
+		-- menu:render()
 	elseif game_state == "serve" then
 		if server == 1 then
 			love.graphics.printf("Player 1's serve", 0, 30, VIRTUAL_WIDTH, "center")
@@ -229,9 +237,17 @@ function love.draw()
 
 		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+		player1:render()
+		player2:render()
+
+		ball:render()
 	elseif game_state == "game" then
 		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+		player1:render()
+		player2:render()
+
+		ball:render()
 	elseif game_state == "result" then
 		if server == 1 then
 			love.graphics.printf("Player 1 won!", 0, 30, VIRTUAL_WIDTH, "center")
@@ -242,11 +258,6 @@ function love.draw()
 		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
 	end
-
-	player1:render()
-	player2:render()
-
-	ball:render()
 
 	push.finish()
 end
