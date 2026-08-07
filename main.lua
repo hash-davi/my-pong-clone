@@ -31,9 +31,9 @@ function love.keypressed(key)
 
 	if key == "return" then
 		if game_state == "menu" then
-			if player1.playable or player2.playable then
-				game_state = "serve"
-			end
+			-- if player1.playable or player2.playable then
+			game_state = "serve"
+			-- end
 		elseif game_state == "serve" then
 			game_state = "game"
 		elseif game_state == "result" then
@@ -138,7 +138,7 @@ function love.update(dt)
 	elseif game_state == "game" then
 		-- Unplayable paddle -
 		if not player1.playable then
-			if ball.dx < 0 then
+			if ball.dx < 0 and ball.x <= VIRTUAL_WIDTH / 2 then
 				player1:track(ball)
 			else
 				player1.dy = 0
@@ -146,7 +146,7 @@ function love.update(dt)
 		end
 
 		if not player2.playable then
-			if ball.dx > 0 then
+			if ball.dx > 0 and ball.x >= VIRTUAL_WIDTH / 2 then
 				player2:track(ball)
 			else
 				player2.dy = 0
