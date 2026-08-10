@@ -9,6 +9,7 @@ function Paddle:init(x, y, width, height, playable)
 	self.dy = 0
 
 	self.state = "static"
+	self.mode = "normal"
 end
 
 function Paddle:render()
@@ -51,5 +52,17 @@ function Paddle:track(ball)
 		self.dy = math.max((paddle_sy - ball.height) / ball_dt, -PLAYER_VELOCITY)
 	else
 		self.dy = 0
+	end
+end
+
+function Paddle:reset()
+	if self.mode == "normal" then
+		self.width = PADDLE_WIDTH
+		self.height = PADDLE_HEIGHT
+	elseif self.mode == "stretched" then
+		self.height = PADDLE_HEIGHT * 1.5
+		if self.y - TOP_WALL >= (self.height - PADDLE_HEIGHT) / 2 then
+			self.y = self.y - (self.height - PADDLE_HEIGHT) / 2
+		end
 	end
 end

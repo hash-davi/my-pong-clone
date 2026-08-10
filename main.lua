@@ -10,6 +10,8 @@ require("Paddle")
 
 require("Ball")
 
+require("Modifier")
+
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
@@ -18,6 +20,9 @@ VIRTUAL_HEIGHT = 243
 
 TOP_WALL = 15
 BOTTOM_WALL = VIRTUAL_HEIGHT - 25
+
+PADDLE_WIDTH = 10
+PADDLE_HEIGHT = 30
 
 PLAYER_VELOCITY = 200
 BALL_DX = 100
@@ -52,6 +57,13 @@ function love.keypressed(key)
 			player2.playable = true
 		end
 	end
+
+	-- if game_state == "game" then
+	-- 	if key == "space" then
+	-- 		player1.mode = "stretched"
+	-- 		player1:reset()
+	-- 	end
+	-- end
 end
 
 function showscore(player, x, y)
@@ -95,17 +107,22 @@ function love.load()
 	server = 1
 
 	-- Player 1 Atributes --------
-	player1 = Paddle(10, TOP_WALL, 10, 30, false)
+	player1 = Paddle(10, TOP_WALL, PADDLE_WIDTH, PADDLE_HEIGHT, false)
 	player1_score = 0
 
 	-- Player 2 Atributes --------
-	player2 = Paddle(VIRTUAL_WIDTH - 20, BOTTOM_WALL - 20, 10, 30, false)
+	player2 = Paddle(VIRTUAL_WIDTH - 20, BOTTOM_WALL - 20, PADDLE_WIDTH, PADDLE_HEIGHT, false)
 	player2_score = 0
 
 	-- Ball Atributes ------------
 	ball = Ball(201, VIRTUAL_HEIGHT / 2, 10, 10)
 
 	menu = Menu()
+
+	modifierTimer = 0
+	modifiers = {}
+
+	modCoolDown = 0
 end
 
 -- Update -------------------
@@ -142,6 +159,9 @@ function love.update(dt)
 		player1_score = 0
 		player2_score = 0
 	elseif game_state == "game" then
+		modifierTimer = modifierTimer + dt
+		modCoolDown = modCoolDown + dt
+
 		-- Unplayable paddle -
 		if not player1.playable then
 			if ball.dx < 0 and ball.x <= VIRTUAL_WIDTH / 2 then
@@ -175,12 +195,32 @@ function love.update(dt)
 			love.audio.play(sounds["hit_sound"])
 		end
 
+		for i, mod in pairs(modifiers) do
+			if ball:collidesWith(mod) then
+				player1.mode = "stretched"
+				player1:reset()
+				modCoolDown = 0
+
+				table.remove(modifiers, i)
+			end
+		end
+
 		if ball.y >= BOTTOM_WALL or ball.y <= TOP_WALL then
 			ball.dy = -ball.dy
 			love.audio.play(sounds["hit_sound"])
 		end
 
 		ball:update(dt)
+
+		if modifierTimer >= 7 and #modifiers <= 3 then
+			modifierTimer = 0
+			table.insert(modifiers, Modifier("stretcher"))
+		end
+
+		if modCoolDown >= 10 then
+			player1.mode = "normal"
+			player1:reset()
+		end
 
 		-- Scoring -----------
 		if ball.x < player1.x then
@@ -241,6 +281,12 @@ function love.draw()
 		player2:render()
 
 		ball:render()
+
+		if #modifiers ~= 0 then
+			for i, mod in pairs(modifiers) do
+				mod:render()
+			end
+		end
 	elseif game_state == "game" then
 		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
@@ -248,6 +294,12 @@ function love.draw()
 		player2:render()
 
 		ball:render()
+
+		if #modifiers ~= 0 then
+			for i, mod in pairs(modifiers) do
+				mod:render()
+			end
+		end
 	elseif game_state == "result" then
 		if server == 1 then
 			love.graphics.printf("Player 1 won!", 0, 30, VIRTUAL_WIDTH, "center")
