@@ -27,6 +27,16 @@ PADDLE_HEIGHT = 30
 PLAYER_VELOCITY = 200
 BALL_DX = 100
 
+local modTypes = {
+	"stretcher",
+	"slow_motion",
+}
+
+local modTypesConverter = {
+	["stretcher"] = "stretched",
+	["slow_motion"] = "slower",
+}
+
 ----------------------------------------------------------
 
 -- Auxiliary functions -----------------------------------
@@ -61,7 +71,7 @@ function love.keypressed(key)
 	-- if game_state == "game" then
 	-- 	if key == "space" then
 	-- 		player1.mode = "stretched"
-	-- 		player1:reset()
+	-- 		player1:modify()
 	-- 	end
 	-- end
 end
@@ -119,10 +129,9 @@ function love.load()
 
 	menu = Menu()
 
-	modifierTimer = 0
+	lastTouch = server
+	modTimer = 0
 	modifiers = {}
-
-	modCoolDown = 0
 end
 
 -- Update -------------------
@@ -130,9 +139,9 @@ function love.update(dt)
 	-- Left paddle ------
 	if player1.playable then
 		if love.keyboard.isDown("w") then
-			player1.dy = -PLAYER_VELOCITY
+			player1:moveUp()
 		elseif love.keyboard.isDown("s") then
-			player1.dy = PLAYER_VELOCITY
+			player1:moveDown()
 		else
 			player1.dy = 0
 			player1.state = "static"
@@ -159,8 +168,7 @@ function love.update(dt)
 		player1_score = 0
 		player2_score = 0
 	elseif game_state == "game" then
-		modifierTimer = modifierTimer + dt
-		modCoolDown = modCoolDown + dt
+		modTimer = modTimer + dt
 
 		-- Unplayable paddle -
 		if not player1.playable then
@@ -184,6 +192,7 @@ function love.update(dt)
 			ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
 			ball.dy = ball.dy + player1.dy / 2
 			ball.x = player1.x + ball.width + 1
+			lastTouch = 1
 
 			love.audio.play(sounds["hit_sound"])
 		end
@@ -191,15 +200,18 @@ function love.update(dt)
 			ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
 			ball.dy = ball.dy + player2.dy / 2
 			ball.x = player2.x - ball.width - 1
+			lastTouch = 2
 
 			love.audio.play(sounds["hit_sound"])
 		end
 
 		for i, mod in pairs(modifiers) do
 			if ball:collidesWith(mod) then
-				player1.mode = "stretched"
-				player1:reset()
-				modCoolDown = 0
+				if lastTouch == 1 then
+					player1:modify(modTypesConverter[mod.type])
+				elseif lastTouch == 2 then
+					player2:modify(modTypesConverter[mod.type])
+				end
 
 				table.remove(modifiers, i)
 			end
@@ -212,14 +224,9 @@ function love.update(dt)
 
 		ball:update(dt)
 
-		if modifierTimer >= 7 and #modifiers <= 3 then
-			modifierTimer = 0
-			table.insert(modifiers, Modifier("stretcher"))
-		end
-
-		if modCoolDown >= 10 then
-			player1.mode = "normal"
-			player1:reset()
+		if modTimer >= 7 and #modifiers <= 3 then
+			modTimer = 0
+			table.insert(modifiers, Modifier("slow_motion"))
 		end
 
 		-- Scoring -----------

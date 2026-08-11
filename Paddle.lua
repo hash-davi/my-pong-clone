@@ -8,6 +8,8 @@ function Paddle:init(x, y, width, height, playable)
 	self.playable = playable
 	self.dy = 0
 
+	self.cooldown = 0
+
 	self.state = "static"
 	self.mode = "normal"
 end
@@ -32,6 +34,16 @@ function Paddle:update(dt)
 	if self.y == BOTTOM_WALL - self.height + 10 or self.y == TOP_WALL then
 		self.dy = 0
 	end
+
+	if self.mode ~= "normal" then
+		self.cooldown = self.cooldown + dt
+
+		if self.cooldown >= 10 then
+			self.mode = "normal"
+			self:modify()
+			self.cooldown = 0
+		end
+	end
 end
 
 function Paddle:track(ball)
@@ -55,7 +67,9 @@ function Paddle:track(ball)
 	end
 end
 
-function Paddle:reset()
+function Paddle:modify(type)
+	self.mode = type
+
 	if self.mode == "normal" then
 		self.width = PADDLE_WIDTH
 		self.height = PADDLE_HEIGHT
@@ -65,4 +79,12 @@ function Paddle:reset()
 			self.y = self.y - (self.height - PADDLE_HEIGHT) / 2
 		end
 	end
+end
+
+function Paddle:moveUp()
+	self.dy = self.mode == "slower" and -PLAYER_VELOCITY * 0.5 or -PLAYER_VELOCITY
+end
+
+function Paddle:moveDown()
+	self.dy = self.mode == "slower" and PLAYER_VELOCITY * 0.5 or PLAYER_VELOCITY
 end
