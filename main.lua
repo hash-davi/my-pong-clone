@@ -32,6 +32,12 @@ local modTypes = {
 	"slow_motion",
 }
 
+local modRanges = {
+	"paddle",
+	"ball",
+	"game",
+}
+
 local modTypesConverter = {
 	["stretcher"] = "stretched",
 	["slow_motion"] = "slower",
@@ -218,16 +224,16 @@ function love.update(dt)
 			end
 		end
 
-		if ball.y >= BOTTOM_WALL or ball.y <= TOP_WALL then
+		if ball.y + ball.height >= BOTTOM_WALL + 10 or ball.y <= TOP_WALL then
 			ball.dy = -ball.dy
 			love.audio.play(sounds["hit_sound"])
 		end
 
 		ball:update(dt)
 
-		if modTimer >= 7 and #modifiers <= 3 then
+		if modTimer >= 10 and #modifiers <= 2 then
 			modTimer = 0
-			table.insert(modifiers, Modifier("slow_motion"))
+			table.insert(modifiers, Modifier(modTypes[math.random(#modTypes)]))
 		end
 
 		-- Scoring -----------

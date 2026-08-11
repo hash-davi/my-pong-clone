@@ -31,7 +31,7 @@ function Paddle:update(dt)
 		self.dy = 0
 	end
 
-	if self.y == BOTTOM_WALL - self.height + 10 or self.y == TOP_WALL then
+	if self.y + self.height == BOTTOM_WALL + 10 or self.y == TOP_WALL then
 		self.dy = 0
 	end
 

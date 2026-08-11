@@ -18,7 +18,7 @@ function Ball:update(dt)
 	self.x = self.x + self.dx * dt
 	self.y = self.y + self.dy * dt
 
-	if self.mode ~= "normal" then
+	if self.mode == "slower" then
 		self.cooldown = self.cooldown + dt
 
 		if self.cooldown >= 10 then
@@ -54,13 +54,13 @@ function Ball:modify(type)
 	self.mode = type
 
 	if self.mode == "normal" then
-		self.dx = self.dx > 0 and math.abs(lastDx) or -math.abs(lastDx)
-		self.dy = self.dy > 0 and lastDy or -lastDy
+		self.dx = self.dx * 2
+		self.dy = self.dy * 2
 		self.cooldown = 0
 	elseif self.mode == "slower" then
 		lastDx = self.dx
 		lastDy = self.dy
-		self.dx = self.dx * 0.5
+		self.dx = self.dx >= 0 and math.max(self.dx * 0.5, BALL_DX * 0.5) or math.max(self.dx * 0.5, -BALL_DX * 0.5)
 		self.dy = self.dy * 0.5
 	end
 end
