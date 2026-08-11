@@ -153,9 +153,9 @@ function love.update(dt)
 	-- Right Paddle ------
 	if player2.playable then
 		if love.keyboard.isDown("up") then
-			player2.dy = -PLAYER_VELOCITY
+			player2:moveUp()
 		elseif love.keyboard.isDown("down") then
-			player2.dy = PLAYER_VELOCITY
+			player2:moveDown()
 		else
 			player2.dy = 0
 			player2.state = "static"
@@ -207,6 +207,7 @@ function love.update(dt)
 
 		for i, mod in pairs(modifiers) do
 			if ball:collidesWith(mod) then
+				ball:modify(modTypesConverter[mod.type])
 				if lastTouch == 1 then
 					player1:modify(modTypesConverter[mod.type])
 				elseif lastTouch == 2 then

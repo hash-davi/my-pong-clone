@@ -8,11 +8,23 @@ function Ball:init(x, y, width, height)
 
 	self.dx = BALL_DX
 	self.dy = 0
+
+	self.cooldown = 0
+
+	self.mode = "normal"
 end
 
 function Ball:update(dt)
 	self.x = self.x + self.dx * dt
 	self.y = self.y + self.dy * dt
+
+	if self.mode ~= "normal" then
+		self.cooldown = self.cooldown + dt
+
+		if self.cooldown >= 10 then
+			self:modify("normal")
+		end
+	end
 end
 
 function Ball:render()
@@ -36,4 +48,19 @@ function Ball:reset()
 	self.y = VIRTUAL_HEIGHT / 2
 	self.dx = BALL_DX
 	self.dy = math.random(-100, 100)
+end
+
+function Ball:modify(type)
+	self.mode = type
+
+	if self.mode == "normal" then
+		self.dx = self.dx > 0 and math.abs(lastDx) or -math.abs(lastDx)
+		self.dy = self.dy > 0 and lastDy or -lastDy
+		self.cooldown = 0
+	elseif self.mode == "slower" then
+		lastDx = self.dx
+		lastDy = self.dy
+		self.dx = self.dx * 0.5
+		self.dy = self.dy * 0.5
+	end
 end

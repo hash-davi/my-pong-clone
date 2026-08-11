@@ -39,9 +39,7 @@ function Paddle:update(dt)
 		self.cooldown = self.cooldown + dt
 
 		if self.cooldown >= 10 then
-			self.mode = "normal"
-			self:modify()
-			self.cooldown = 0
+			self:modify("normal")
 		end
 	end
 end
@@ -73,6 +71,7 @@ function Paddle:modify(type)
 	if self.mode == "normal" then
 		self.width = PADDLE_WIDTH
 		self.height = PADDLE_HEIGHT
+		self.cooldown = 0
 	elseif self.mode == "stretched" then
 		self.height = PADDLE_HEIGHT * 1.5
 		if self.y - TOP_WALL >= (self.height - PADDLE_HEIGHT) / 2 then
