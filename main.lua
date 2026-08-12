@@ -33,9 +33,8 @@ local modTypes = {
 }
 
 local modRanges = {
-	"paddle",
-	"ball",
-	"game",
+	["slow_motion"] = "stage",
+	["stretcher"] = "paddle",
 }
 
 local modTypesConverter = {
@@ -135,6 +134,12 @@ function love.load()
 
 	menu = Menu()
 
+	movables = {
+		player1,
+		player2,
+		ball,
+	}
+
 	lastTouch = server
 	modTimer = 0
 	modifiers = {}
@@ -213,7 +218,12 @@ function love.update(dt)
 
 		for i, mod in pairs(modifiers) do
 			if ball:collidesWith(mod) then
-				ball:modify(modTypesConverter[mod.type])
+				if mod.type == "slow_motion" then
+					for i, movable in pairs(movables) do
+						movable.dx = movable.dx ~= nil and movable.dx * 0.5 or nil
+						movable.dy = movable.dy * 0.5
+					end
+				end
 				if lastTouch == 1 then
 					player1:modify(modTypesConverter[mod.type])
 				elseif lastTouch == 2 then
