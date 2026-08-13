@@ -6,41 +6,13 @@ local push = require("push")
 
 require("Menu")
 
-require("Paddle")
-
-require("Ball")
-
-require("Modifier")
+require("Stage")
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
 VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
-
-TOP_WALL = 15
-BOTTOM_WALL = VIRTUAL_HEIGHT - 25
-
-PADDLE_WIDTH = 10
-PADDLE_HEIGHT = 30
-
-PLAYER_VELOCITY = 200
-BALL_DX = 100
-
-local modTypes = {
-	"stretcher",
-	"slow_motion",
-}
-
-local modRanges = {
-	["slow_motion"] = "stage",
-	["stretcher"] = "paddle",
-}
-
-local modTypesConverter = {
-	["stretcher"] = "stretched",
-	["slow_motion"] = "slower",
-}
 
 ----------------------------------------------------------
 
@@ -53,32 +25,26 @@ function love.keypressed(key)
 
 	if key == "return" then
 		if game_state == "menu" then
-			-- if player1.playable or player2.playable then
-			game_state = "serve"
-			-- end
-		elseif game_state == "serve" then
-			game_state = "game"
-		elseif game_state == "result" then
+			game_state = "stage"
+			stage:load()
+		elseif stage.state == "select" then
+			stage.state = "serve"
+		elseif stage.state == "serve" then
+			stage.state = "rally"
+		elseif stage.state == "result" then
 			game_state = "menu"
 		end
 	end
 
-	if game_state == "serve" then
+	if stage.state == "select" then
 		if key == "w" or key == "s" then
-			player1.playable = true
+			stage:activate(stage.characters.leftPaddle)
 		end
 
 		if key == "up" or key == "down" then
-			player2.playable = true
+			stage:activate(stage.characters.rightPaddle)
 		end
 	end
-
-	-- if game_state == "game" then
-	-- 	if key == "space" then
-	-- 		player1.mode = "stretched"
-	-- 		player1:modify()
-	-- 	end
-	-- end
 end
 
 function showscore(player, x, y)
@@ -119,163 +85,145 @@ function love.load()
 	}
 
 	game_state = "menu"
-	server = 1
 
-	-- Player 1 Atributes --------
-	player1 = Paddle(10, TOP_WALL, PADDLE_WIDTH, PADDLE_HEIGHT, false)
-	player1_score = 0
-
-	-- Player 2 Atributes --------
-	player2 = Paddle(VIRTUAL_WIDTH - 20, BOTTOM_WALL - 20, PADDLE_WIDTH, PADDLE_HEIGHT, false)
-	player2_score = 0
-
-	-- Ball Atributes ------------
-	ball = Ball(201, VIRTUAL_HEIGHT / 2, 10, 10)
+	stage = Stage({
+		leftPaddle = Paddle(10, TOP_WALL, PADDLE_WIDTH, PADDLE_HEIGHT, false),
+		rightPaddle = Paddle(VIRTUAL_WIDTH - 20, BOTTOM_WALL - 20, PADDLE_WIDTH, PADDLE_HEIGHT, false),
+		ball = Ball(201, VIRTUAL_HEIGHT / 2, 10, 10),
+	})
 
 	menu = Menu()
-
-	movables = {
-		player1,
-		player2,
-		ball,
-	}
-
-	lastTouch = server
-	modTimer = 0
-	modifiers = {}
 end
 
 -- Update -------------------
 function love.update(dt)
-	-- Left paddle ------
-	if player1.playable then
-		if love.keyboard.isDown("w") then
-			player1:moveUp()
-		elseif love.keyboard.isDown("s") then
-			player1:moveDown()
-		else
-			player1.dy = 0
-			player1.state = "static"
-		end
-	end
-
-	player1:update(dt)
-
-	-- Right Paddle ------
-	if player2.playable then
-		if love.keyboard.isDown("up") then
-			player2:moveUp()
-		elseif love.keyboard.isDown("down") then
-			player2:moveDown()
-		else
-			player2.dy = 0
-			player2.state = "static"
-		end
-	end
-
-	player2:update(dt)
-
-	if game_state == "menu" then
-		player1_score = 0
-		player2_score = 0
-	elseif game_state == "game" then
-		modTimer = modTimer + dt
-
-		-- Unplayable paddle -
-		if not player1.playable then
-			if ball.dx < 0 and ball.x <= VIRTUAL_WIDTH / 2 then
-				player1:track(ball)
-			else
-				player1.dy = 0
-			end
-		end
-
-		if not player2.playable then
-			if ball.dx > 0 and ball.x >= VIRTUAL_WIDTH / 2 then
-				player2:track(ball)
-			else
-				player2.dy = 0
-			end
-		end
-
-		-- Ball --------------
-		if ball:collidesWith(player1) then
-			ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
-			ball.dy = ball.dy + player1.dy / 2
-			ball.x = player1.x + ball.width + 1
-			lastTouch = 1
-
-			love.audio.play(sounds["hit_sound"])
-		end
-		if ball:collidesWith(player2) then
-			ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
-			ball.dy = ball.dy + player2.dy / 2
-			ball.x = player2.x - ball.width - 1
-			lastTouch = 2
-
-			love.audio.play(sounds["hit_sound"])
-		end
-
-		for i, mod in pairs(modifiers) do
-			if ball:collidesWith(mod) then
-				if mod.type == "slow_motion" then
-					for i, movable in pairs(movables) do
-						movable.dx = movable.dx ~= nil and movable.dx * 0.5 or nil
-						movable.dy = movable.dy * 0.5
-					end
-				end
-				if lastTouch == 1 then
-					player1:modify(modTypesConverter[mod.type])
-				elseif lastTouch == 2 then
-					player2:modify(modTypesConverter[mod.type])
-				end
-
-				table.remove(modifiers, i)
-			end
-		end
-
-		if ball.y + ball.height >= BOTTOM_WALL + 10 or ball.y <= TOP_WALL then
-			ball.dy = -ball.dy
-			love.audio.play(sounds["hit_sound"])
-		end
-
-		ball:update(dt)
-
-		if modTimer >= 10 and #modifiers <= 2 then
-			modTimer = 0
-			table.insert(modifiers, Modifier(modTypes[math.random(#modTypes)]))
-		end
-
-		-- Scoring -----------
-		if ball.x < player1.x then
-			player2_score = player2_score + 1
-
-			love.audio.play(sounds["score_sound"])
-
-			server = 2
-			game_state = "serve"
-		elseif ball.x > player2.x then
-			player1_score = player1_score + 1
-
-			love.audio.play(sounds["score_sound"])
-
-			server = 1
-			game_state = "serve"
-		end
-
-		if player1_score == 11 or player2_score == 11 then
-			game_state = "result"
-		end
-	elseif game_state == "serve" then
-		ball:reset()
-
-		if server == 1 then
-			ball.dx = BALL_DX
-		elseif server == 2 then
-			ball.dx = -BALL_DX
-		end
-	elseif game_state == "result" then
-		ball:reset()
+	-- -- Left paddle ------
+	-- if leftPaddle.playable then
+	-- 	if love.keyboard.isDown("w") then
+	-- 		leftPaddle:moveUp()
+	-- 	elseif love.keyboard.isDown("s") then
+	-- 		leftPaddle:moveDown()
+	-- 	else
+	-- 		leftPaddle.dy = 0
+	-- 		leftPaddle.state = "static"
+	-- 	end
+	-- end
+	--
+	-- leftPaddle:update(dt)
+	--
+	-- -- Right Paddle ------
+	-- if rightPaddle.playable then
+	-- 	if love.keyboard.isDown("up") then
+	-- 		rightPaddle:moveUp()
+	-- 	elseif love.keyboard.isDown("down") then
+	-- 		rightPaddle:moveDown()
+	-- 	else
+	-- 		rightPaddle.dy = 0
+	-- 		rightPaddle.state = "static"
+	-- 	end
+	-- end
+	--
+	-- rightPaddle:update(dt)
+	--
+	if game_state == "stage" then
+		stage:update(dt)
+		-- modTimer = modTimer + dt
+		--
+		-- -- Unplayable paddle -
+		-- if not leftPaddle.playable then
+		-- 	if ball.dx < 0 and ball.x <= VIRTUAL_WIDTH / 2 then
+		-- 		leftPaddle:track(ball)
+		-- 	else
+		-- 		leftPaddle.dy = 0
+		-- 	end
+		-- end
+		--
+		-- if not rightPaddle.playable then
+		-- 	if ball.dx > 0 and ball.x >= VIRTUAL_WIDTH / 2 then
+		-- 		rightPaddle:track(ball)
+		-- 	else
+		-- 		rightPaddle.dy = 0
+		-- 	end
+		-- end
+		--
+		-- -- Ball --------------
+		-- if ball:collidesWith(leftPaddle) then
+		-- 	ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
+		-- 	ball.dy = ball.dy + leftPaddle.dy / 2
+		-- 	ball.x = leftPaddle.x + ball.width + 1
+		-- 	lastTouch = 1
+		--
+		-- 	love.audio.play(sounds["hit_sound"])
+		-- end
+		-- if ball:collidesWith(rightPaddle) then
+		-- 	ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
+		-- 	ball.dy = ball.dy + rightPaddle.dy / 2
+		-- 	ball.x = rightPaddle.x - ball.width - 1
+		-- 	lastTouch = 2
+		--
+		-- 	love.audio.play(sounds["hit_sound"])
+		-- end
+		--
+		-- for i, mod in pairs(modifiers) do
+		-- 	if ball:collidesWith(mod) then
+		-- 		if mod.type == "slow_motion" then
+		-- 			for i, movable in pairs(movables) do
+		-- 				movable.dx = movable.dx ~= nil and movable.dx * 0.5 or nil
+		-- 				movable.dy = movable.dy * 0.5
+		-- 			end
+		-- 		end
+		-- 		if lastTouch == 1 then
+		-- 			leftPaddle:modify(modTypesConverter[mod.type])
+		-- 		elseif lastTouch == 2 then
+		-- 			rightPaddle:modify(modTypesConverter[mod.type])
+		-- 		end
+		--
+		-- 		table.remove(modifiers, i)
+		-- 	end
+		-- end
+		--
+		-- if ball.y + ball.height >= BOTTOM_WALL + 10 or ball.y <= TOP_WALL then
+		-- 	ball.dy = -ball.dy
+		-- 	love.audio.play(sounds["hit_sound"])
+		-- end
+		--
+		-- ball:update(dt)
+		--
+		-- if modTimer >= 10 and #modifiers <= 2 then
+		-- 	modTimer = 0
+		-- 	table.insert(modifiers, Modifier(modTypes[math.random(#modTypes)]))
+		-- end
+		--
+		-- -- Scoring -----------
+		-- if ball.x < leftPaddle.x then
+		-- 	player2_score = player2_score + 1
+		--
+		-- 	love.audio.play(sounds["score_sound"])
+		--
+		-- 	server = 2
+		-- 	game_state = "serve"
+		-- elseif ball.x > rightPaddle.x then
+		-- 	player1_score = player1_score + 1
+		--
+		-- 	love.audio.play(sounds["score_sound"])
+		--
+		-- 	server = 1
+		-- 	game_state = "serve"
+		-- end
+		--
+		-- if player1_score == 11 or player2_score == 11 then
+		-- 	game_state = "result"
+		-- end
+		-- elseif game_state == "serve" then
+		-- 	ball:reset()
+		--
+		-- 	if server == 1 then
+		-- 		ball.dx = BALL_DX
+		-- 	elseif server == 2 then
+		-- 		ball.dx = -BALL_DX
+		-- 	end
+		-- elseif game_state == "result" then
+		-- 	ball:reset()
 	end
 end
 
@@ -292,42 +240,44 @@ function love.draw()
 		love.graphics.printf("Welcome to Pong", 0, 60, VIRTUAL_WIDTH, "center")
 		love.graphics.printf("Press return to play", 0, VIRTUAL_HEIGHT - 80, VIRTUAL_WIDTH, "center")
 		-- menu:render()
-	elseif game_state == "serve" then
-		if server == 1 then
+	elseif stage.state == "serve" then
+		if stage.server == 1 then
 			love.graphics.printf("Player 1's serve", 0, 30, VIRTUAL_WIDTH, "center")
-		elseif server == 2 then
+		elseif stage.server == 2 then
 			love.graphics.printf("Player 2's serve", 0, 30, VIRTUAL_WIDTH, "center")
 		end
 
 		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
-		player1:render()
-		player2:render()
+		stage.characters.leftPaddle:render()
+		stage.characters.rightPaddle:render()
 
-		ball:render()
+		stage.characters.ball:render()
 
-		if #modifiers ~= 0 then
-			for i, mod in pairs(modifiers) do
+		if #stage.modifiers ~= 0 then
+			for i, mod in pairs(stage.modifiers) do
 				mod:render()
 			end
 		end
-	elseif game_state == "game" then
+	elseif game_state == "stage" then
 		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
-		player1:render()
-		player2:render()
+		stage.characters.leftPaddle:render()
+		stage.characters.rightPaddle:render()
 
-		ball:render()
+		stage.characters.ball:render()
 
-		if #modifiers ~= 0 then
-			for i, mod in pairs(modifiers) do
+		love.graphics.printf(stage.state, 0, 30, VIRTUAL_WIDTH, "center")
+
+		if #stage.modifiers ~= 0 then
+			for i, mod in pairs(stage.modifiers) do
 				mod:render()
 			end
 		end
-	elseif game_state == "result" then
-		if server == 1 then
+	elseif stage.state == "result" then
+		if stage.server == 1 then
 			love.graphics.printf("Player 1 won!", 0, 30, VIRTUAL_WIDTH, "center")
-		elseif server == 2 then
+		elseif stage.server == 2 then
 			love.graphics.printf("Player 2 won!", 0, 30, VIRTUAL_WIDTH, "center")
 		end
 
