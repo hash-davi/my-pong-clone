@@ -268,6 +268,8 @@ function love.draw()
 		stage.characters.ball:render()
 
 		love.graphics.printf(stage.state, 0, 30, VIRTUAL_WIDTH, "center")
+		love.graphics.printf(ball.dx, 0, 120, VIRTUAL_WIDTH, "center")
+		love.graphics.printf(ball.dy, 0, 160, VIRTUAL_WIDTH, "center")
 
 		if #stage.modifiers ~= 0 then
 			for i, mod in pairs(stage.modifiers) do

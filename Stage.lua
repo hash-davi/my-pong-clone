@@ -18,6 +18,8 @@ PADDLE_HEIGHT = 30
 PLAYER_VELOCITY = 200
 BALL_DX = 100
 
+slowingFactor = 1
+
 local modTypes = {
 	"stretcher",
 	"slow_motion",
@@ -44,7 +46,7 @@ local possibleStates = {
 
 function Stage:init(characters)
 	self.characters = characters
-	self.actives = {}
+	self.paddles = {}
 	self.modifiers = {}
 
 	self.server = 1
@@ -59,6 +61,11 @@ function Stage:load()
 	rightPaddle = self.characters.rightPaddle
 	ball = self.characters.ball
 
+	self.paddles = {
+		leftPaddle,
+		rightPaddle,
+	}
+
 	player1_score = 0
 	player2_score = 0
 
@@ -68,8 +75,6 @@ function Stage:load()
 end
 
 function Stage:update(dt)
-	modTimer = modTimer + dt
-
 	if self.mode ~= "normal" then
 		self.cooldown = self.cooldown + dt
 
@@ -81,9 +86,9 @@ function Stage:update(dt)
 	-- Left paddle ------
 	if leftPaddle.playable then
 		if love.keyboard.isDown("w") then
-			leftPaddle:moveY(-PLAYER_VELOCITY, dt)
+			leftPaddle:moveY(-PLAYER_VELOCITY * dt)
 		elseif love.keyboard.isDown("s") then
-			leftPaddle:moveY(PLAYER_VELOCITY, dt)
+			leftPaddle:moveY(PLAYER_VELOCITY * dt)
 		else
 			leftPaddle:stop()
 		end
@@ -94,9 +99,9 @@ function Stage:update(dt)
 	-- Right Paddle ------
 	if rightPaddle.playable then
 		if love.keyboard.isDown("up") then
-			rightPaddle:moveY(-100, dt)
+			rightPaddle:moveY(-PLAYER_VELOCITY * dt)
 		elseif love.keyboard.isDown("down") then
-			rightPaddle:moveY(100, dt)
+			rightPaddle:moveY(PLAYER_VELOCITY * dt)
 		else
 			rightPaddle:stop()
 		end
@@ -113,6 +118,8 @@ function Stage:update(dt)
 			ball.dx = -BALL_DX
 		end
 	elseif self.state == "rally" then
+		modTimer = modTimer + dt
+
 		-- Unplayable paddles -
 		if not leftPaddle.playable then
 			if ball.dx < 0 and ball.x <= VIRTUAL_WIDTH / 2 then
@@ -130,19 +137,22 @@ function Stage:update(dt)
 			end
 		end
 
+		ball:moveX(ball.dx * dt)
+		ball:moveY(ball.dy * dt)
+
 		-- Ball --------------
 		if ball:collidesWith(leftPaddle) then
-			ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
-			ball.dy = ball.dy + leftPaddle.dy / 2
-			ball.x = leftPaddle.x + leftPaddle.width + 1
+			ball:setDx(math.min(-ball.dx * 1.05, BALL_DX * 2))
+			ball:setDy(ball.dy + leftPaddle.dy / 2)
+			ball:moveX(leftPaddle.x + leftPaddle.width + 1 - ball.x)
 			scorer = 1
 
 			love.audio.play(sounds["hit_sound"])
 		end
 		if ball:collidesWith(rightPaddle) then
-			ball.dx = math.min(-ball.dx * 1.05, BALL_DX * 2)
-			ball.dy = ball.dy + rightPaddle.dy / 2
-			ball.x = rightPaddle.x - ball.width - 1
+			ball:setDx(math.min(-ball.dx * 1.05, BALL_DX * 2))
+			ball:setDy(ball.dy + rightPaddle.dy / 2)
+			ball:moveX(rightPaddle.x - ball.width - 1 - ball.x)
 			scorer = 2
 
 			love.audio.play(sounds["hit_sound"])
@@ -165,7 +175,7 @@ function Stage:update(dt)
 		end
 
 		if ball.y + ball.height >= BOTTOM_WALL + 10 or ball.y <= TOP_WALL then
-			ball.dy = -ball.dy
+			-- ball.dy = -ball.dy
 			love.audio.play(sounds["hit_sound"])
 		end
 
@@ -193,7 +203,7 @@ function Stage:update(dt)
 			self.state = "serve"
 		end
 
-		if player1_score == 1 or player2_score == 11 then
+		if player1_score == 11 or player2_score == 11 then
 			self.state = "result"
 		end
 	elseif self.state == "result" then
@@ -203,8 +213,6 @@ end
 
 function Stage:activate(paddle)
 	paddle.playable = true
-
-	table.insert(self.actives, paddle)
 end
 
 function Stage:modify(type)
@@ -212,11 +220,12 @@ function Stage:modify(type)
 
 	if self.mode == "normal" then
 		self.cooldown = 0
-	end
-	if self.mode == "slower" then
-		for i, character in pairs(self.characters) do
-			character.dy = character.dy * 0.5
-		end
+		slowingFactor = 1
+	elseif self.mode == "slower" then
+		slowingFactor = 0.5
+		-- for i, character in pairs(self.characters) do
+		-- 	character.dy = character.dy * 0.5
+		-- end
 	end
 end
 

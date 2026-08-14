@@ -1,5 +1,15 @@
 Paddle = Class({})
 
+function sign(num)
+	if num > 0 then
+		return 1
+	elseif num < 0 then
+		return -1
+	else
+		return 0
+	end
+end
+
 function Paddle:init(x, y, width, height, playable)
 	self.x = x
 	self.y = y
@@ -19,17 +29,7 @@ function Paddle:render()
 end
 
 function Paddle:update(dt)
-	if self.state == "moving" then
-		if self.dy < 0 then
-			self.y = math.max(self.y, TOP_WALL)
-		else
-			self.y = math.min(self.y, BOTTOM_WALL - self.height + 10)
-		end
-	elseif self.state == "static" then
-		self:stop()
-	end
-
-	if self.y + self.height == BOTTOM_WALL + 10 or self.y == TOP_WALL then
+	if self.state == "static" then
 		self:stop()
 	end
 
@@ -56,16 +56,16 @@ function Paddle:track(ball, dt)
 
 	if paddle_sy > 0 then -- If the ball will fall below the paddle
 		-- self.dy = math.min(paddle_sy / ball_dt, PLAYER_VELOCITY)
-		self:moveY(paddle_sy, dt)
+		self:moveY((-paddle_sy / ball_dt) * dt)
 	elseif paddle_sy < 0 then -- If the ball will fall above the paddle
 		-- self.dy = math.max((paddle_sy - ball.height) / ball_dt, -PLAYER_VELOCITY)
-		self:moveY(paddle_sy, dt)
+		self:moveY((paddle_sy / ball_dt) * dt)
 	else
 		self:stop()
 	end
 end
 
-function Paddle:modify(type, dt)
+function Paddle:modify(type)
 	self.mode = type
 
 	if self.mode == "normal" then
@@ -76,19 +76,42 @@ function Paddle:modify(type, dt)
 		self.height = PADDLE_HEIGHT * 1.5
 		if self.y - TOP_WALL >= (self.height - PADDLE_HEIGHT) / 2 then
 			-- self.y = self.y - (self.height - PADDLE_HEIGHT) / 2
-			self:moveY((self.height - PADDLE_HEIGHT / 2), dt)
+			self:moveY((self.height - PADDLE_HEIGHT / 2))
 		end
 	end
 end
 
-function Paddle:moveY(distanceY, dt)
+function Paddle:moveY(distanceY)
 	self.state = "moving"
 
-	self.dy = distanceY > 0 and PLAYER_VELOCITY or -PLAYER_VELOCITY
+	self:setSpeed(PLAYER_VELOCITY * sign(distanceY))
+
+	local move = math.floor(distanceY)
 
 	if distanceY ~= 0 then
-		self.y = self.y + self.dy * dt
+		local move_sign = sign(distanceY)
+		while move ~= 0 do
+			if self:collidesAt(self.y + move_sign) then
+				self:stop()
+				break
+			else
+				self.y = self.y + move_sign
+				move = move - move_sign
+			end
+		end
 	end
+end
+
+function Paddle:collidesAt(position)
+	if position <= TOP_WALL or position + self.height >= BOTTOM_WALL + 10 then
+		return true
+	end
+
+	return false
+end
+
+function Paddle:setSpeed(speed)
+	self.dy = speed * slowingFactor
 end
 
 function Paddle:stop()
