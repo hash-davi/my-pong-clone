@@ -86,9 +86,11 @@ function Stage:update(dt)
 	-- Left paddle ------
 	if leftPaddle.playable then
 		if love.keyboard.isDown("w") then
-			leftPaddle:moveY(-PLAYER_VELOCITY * dt)
+			leftPaddle:setSpeed(-PLAYER_VELOCITY)
+			leftPaddle:moveY(leftPaddle.dy * dt * slowingFactor)
 		elseif love.keyboard.isDown("s") then
-			leftPaddle:moveY(PLAYER_VELOCITY * dt)
+			leftPaddle:setSpeed(PLAYER_VELOCITY)
+			leftPaddle:moveY(leftPaddle.dy * dt * slowingFactor)
 		else
 			leftPaddle:stop()
 		end
@@ -99,9 +101,11 @@ function Stage:update(dt)
 	-- Right Paddle ------
 	if rightPaddle.playable then
 		if love.keyboard.isDown("up") then
-			rightPaddle:moveY(-PLAYER_VELOCITY * dt)
+			rightPaddle:setSpeed(-PLAYER_VELOCITY)
+			rightPaddle:moveY(rightPaddle.dy * dt * slowingFactor)
 		elseif love.keyboard.isDown("down") then
-			rightPaddle:moveY(PLAYER_VELOCITY * dt)
+			rightPaddle:setSpeed(PLAYER_VELOCITY)
+			rightPaddle:moveY(rightPaddle.dy * dt * slowingFactor)
 		else
 			rightPaddle:stop()
 		end
@@ -137,12 +141,14 @@ function Stage:update(dt)
 			end
 		end
 
-		ball:moveX(ball.dx * dt)
-		ball:moveY(ball.dy * dt)
+		ball:setDx(ball.dx)
+		ball:moveX(ball.dx * dt * slowingFactor)
+		ball:setDy(ball.dy)
+		ball:moveY(ball.dy * dt * slowingFactor)
 
 		-- Ball --------------
 		if ball:collidesWith(leftPaddle) then
-			ball:setDx(math.min(-ball.dx * 1.05, BALL_DX * 2))
+			ball:setDx(-ball.dx * 1.05)
 			ball:setDy(ball.dy + leftPaddle.dy / 2)
 			ball:moveX(leftPaddle.x + leftPaddle.width + 1 - ball.x)
 			scorer = 1
@@ -150,7 +156,7 @@ function Stage:update(dt)
 			love.audio.play(sounds["hit_sound"])
 		end
 		if ball:collidesWith(rightPaddle) then
-			ball:setDx(math.min(-ball.dx * 1.05, BALL_DX * 2))
+			ball:setDx(-ball.dx * 1.05)
 			ball:setDy(ball.dy + rightPaddle.dy / 2)
 			ball:moveX(rightPaddle.x - ball.width - 1 - ball.x)
 			scorer = 2
@@ -175,7 +181,14 @@ function Stage:update(dt)
 		end
 
 		if ball.y + ball.height >= BOTTOM_WALL + 10 or ball.y <= TOP_WALL then
-			-- ball.dy = -ball.dy
+			ball:setDy(-ball.dy)
+
+			if ball.y + ball.height >= BOTTOM_WALL + 10 then
+				ball:moveY(-1)
+			elseif ball.y <= TOP_WALL then
+				ball:moveY(1)
+			end
+
 			love.audio.play(sounds["hit_sound"])
 		end
 

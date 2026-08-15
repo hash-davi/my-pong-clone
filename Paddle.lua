@@ -18,6 +18,8 @@ function Paddle:init(x, y, width, height, playable)
 	self.playable = playable
 	self.dy = 0
 
+	self.paddle_sy = 0
+
 	self.cooldown = 0
 
 	self.state = "static"
@@ -43,23 +45,25 @@ function Paddle:update(dt)
 end
 
 function Paddle:track(ball, dt)
-	local ball_sx = self.x - (ball.x + ball.width)
-	local ball_dt = ball.dx / ball_sx
+	ball_sx = self.x - (ball.x + ball.width)
+	ball_dt = ball.dx / ball_sx
 
-	local ball_sy = ball.dy * ball_dt
-	local final_position = {
+	ball_sy = ball.dy * ball_dt
+	final_position = {
 		x = ball.x + ball.width + ball_sx,
 		y = ball.y + ball.height + ball_sy,
 	}
 
-	local paddle_sy = final_position.y - (self.y + self.height / 2)
+	self.paddle_sy = final_position.y - (self.y + self.height / 2)
 
-	if paddle_sy > 0 then -- If the ball will fall below the paddle
+	if self.paddle_sy > self.height / 2 then -- If the ball will fall below the paddle
 		-- self.dy = math.min(paddle_sy / ball_dt, PLAYER_VELOCITY)
-		self:moveY((-paddle_sy / ball_dt) * dt)
-	elseif paddle_sy < 0 then -- If the ball will fall above the paddle
+		self:setSpeed(PLAYER_VELOCITY)
+		self:moveY(self.dy * dt * slowingFactor)
+	elseif self.paddle_sy < -self.height / 2 then -- If the ball will fall above the paddle
 		-- self.dy = math.max((paddle_sy - ball.height) / ball_dt, -PLAYER_VELOCITY)
-		self:moveY((paddle_sy / ball_dt) * dt)
+		self:setSpeed(-PLAYER_VELOCITY)
+		self:moveY(self.dy * dt * slowingFactor)
 	else
 		self:stop()
 	end
@@ -73,37 +77,27 @@ function Paddle:modify(type)
 		self.height = PADDLE_HEIGHT
 		self.cooldown = 0
 	elseif self.mode == "stretched" then
-		self.height = PADDLE_HEIGHT * 1.5
-		if self.y - TOP_WALL >= (self.height - PADDLE_HEIGHT) / 2 then
-			-- self.y = self.y - (self.height - PADDLE_HEIGHT) / 2
-			self:moveY((self.height - PADDLE_HEIGHT / 2))
+		if self.dy == 0 then
+			self:moveY(-(self.height - PADDLE_HEIGHT / 2))
 		end
+		self.height = PADDLE_HEIGHT * 1.5
 	end
 end
 
 function Paddle:moveY(distanceY)
 	self.state = "moving"
 
-	self:setSpeed(PLAYER_VELOCITY * sign(distanceY))
-
-	local move = math.floor(distanceY)
-
 	if distanceY ~= 0 then
-		local move_sign = sign(distanceY)
-		while move ~= 0 do
-			if self:collidesAt(self.y + move_sign) then
-				self:stop()
-				break
-			else
-				self.y = self.y + move_sign
-				move = move - move_sign
-			end
+		if self:collidesAt(self.y + distanceY) then
+			self:stop()
+		else
+			self.y = self.y + distanceY
 		end
 	end
 end
 
 function Paddle:collidesAt(position)
-	if position <= TOP_WALL or position + self.height >= BOTTOM_WALL + 10 then
+	if position <= TOP_WALL or self.height + position >= BOTTOM_WALL + 10 then
 		return true
 	end
 
@@ -111,7 +105,7 @@ function Paddle:collidesAt(position)
 end
 
 function Paddle:setSpeed(speed)
-	self.dy = speed * slowingFactor
+	self.dy = speed
 end
 
 function Paddle:stop()

@@ -44,6 +44,12 @@ function love.keypressed(key)
 		if key == "up" or key == "down" then
 			stage:activate(stage.characters.rightPaddle)
 		end
+	elseif stage.state == "rally" then
+		if key == "space" then
+			stage:modify("slower")
+		elseif key == "k" then
+			leftPaddle:modify("stretched")
+		end
 	end
 end
 
@@ -270,6 +276,7 @@ function love.draw()
 		love.graphics.printf(stage.state, 0, 30, VIRTUAL_WIDTH, "center")
 		love.graphics.printf(ball.dx, 0, 120, VIRTUAL_WIDTH, "center")
 		love.graphics.printf(ball.dy, 0, 160, VIRTUAL_WIDTH, "center")
+		love.graphics.printf(rightPaddle.paddle_sy, 0, 192, VIRTUAL_WIDTH, "center")
 
 		if #stage.modifiers ~= 0 then
 			for i, mod in pairs(stage.modifiers) do

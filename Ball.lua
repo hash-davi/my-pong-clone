@@ -75,50 +75,23 @@ end
 function Ball:moveX(distanceX)
 	self.state = "moving"
 
-	self:setDx(BALL_DX * sign(distanceX))
-
-	local move = math.floor(distanceX)
-
 	if distanceX ~= 0 then
-		local move_sign = sign(distanceX)
-		while move ~= 0 do
-			self.x = self.x + move_sign
-			move = move - move_sign
-		end
+		self.x = self.x + distanceX
 	end
 end
 
 function Ball:moveY(distanceY)
 	self.state = "moving"
 
-	local move = math.floor(distanceY)
-
 	if distanceY ~= 0 then
-		local move_sign = sign(distanceY)
-		while move ~= 0 do
-			if self:collidesAt(self.y + move_sign) then
-				self:setDy(-self.dy)
-				break
-			else
-				self.y = self.y + move_sign
-				move = move - move_sign
-			end
-		end
+		self.y = self.y + distanceY
 	end
-end
-
-function Ball:collidesAt(position)
-	if position <= TOP_WALL or position + self.height >= BOTTOM_WALL + 10 then
-		return true
-	end
-
-	return false
 end
 
 function Ball:setDx(speed)
-	self.dx = speed * slowingFactor
+	self.dx = math.min(speed, BALL_DX * 2)
 end
 
 function Ball:setDy(speed)
-	self.dy = speed * slowingFactor
+	self.dy = math.min(speed, BALL_DX * 2)
 end
