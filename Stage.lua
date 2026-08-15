@@ -234,12 +234,26 @@ function Stage:modify(type)
 	if self.mode == "normal" then
 		self.cooldown = 0
 		slowingFactor = 1
+		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 	elseif self.mode == "slower" then
 		slowingFactor = 0.5
-		-- for i, character in pairs(self.characters) do
-		-- 	character.dy = character.dy * 0.5
-		-- end
+		love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
 	end
+end
+
+function Stage:render()
+	if self.mode == "slower" then
+		love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
+	end
+	love.graphics.rectangle("fill", VIRTUAL_WIDTH / 2 - 10, TOP_WALL, 1, BOTTOM_WALL - 5)
+
+	love.graphics.rectangle(
+		"line",
+		leftPaddle.x - 2,
+		TOP_WALL,
+		(rightPaddle.x + rightPaddle.width) - leftPaddle.x + 4,
+		BOTTOM_WALL - 5
+	)
 end
 
 function Stage:reset()

@@ -18,8 +18,6 @@ function Paddle:init(x, y, width, height, playable)
 	self.playable = playable
 	self.dy = 0
 
-	self.paddle_sy = 0
-
 	self.cooldown = 0
 
 	self.state = "static"
@@ -27,7 +25,11 @@ function Paddle:init(x, y, width, height, playable)
 end
 
 function Paddle:render()
+	if self.mode == "stretched" then
+		love.graphics.setColor(241 / 255, 81 / 255, 82 / 255)
+	end
 	love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+	love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 end
 
 function Paddle:update(dt)
@@ -45,22 +47,20 @@ function Paddle:update(dt)
 end
 
 function Paddle:track(ball, dt)
-	ball_sx = self.x - (ball.x + ball.width)
-	ball_dt = ball.dx / ball_sx
+	local ball_sx = self.x - (ball.x + ball.width)
+	local ball_dt = (ball.dx / ball_sx) * dt
 
-	ball_sy = ball.dy * ball_dt
-	final_position = {
+	local ball_sy = ball.dy * ball_dt
+	local final_position = {
 		x = ball.x + ball.width + ball_sx,
 		y = ball.y + ball.height + ball_sy,
 	}
 
-	self.paddle_sy = final_position.y - (self.y + self.height / 2)
-
-	if self.paddle_sy > self.height / 2 then -- If the ball will fall below the paddle
+	if final_position.y > self.y + self.height then -- If the ball will fall below the paddle
 		-- self.dy = math.min(paddle_sy / ball_dt, PLAYER_VELOCITY)
 		self:setSpeed(PLAYER_VELOCITY)
 		self:moveY(self.dy * dt * slowingFactor)
-	elseif self.paddle_sy < -self.height / 2 then -- If the ball will fall above the paddle
+	elseif final_position.y < self.y then -- If the ball will fall above the paddle
 		-- self.dy = math.max((paddle_sy - ball.height) / ball_dt, -PLAYER_VELOCITY)
 		self:setSpeed(-PLAYER_VELOCITY)
 		self:moveY(self.dy * dt * slowingFactor)

@@ -26,12 +26,7 @@ function Ball:init(x, y, width, height)
 end
 
 function Ball:update(dt)
-	-- -- self.x = self.x + self.dx * dt
-	-- self:moveX(self.dx * dt)
-	-- -- self.y = self.y + self.dy * dt
-	-- self:moveY(self.dy * dt)
-
-	if self.mode == "slower" then
+	if self.mode ~= "normal" then
 		self.cooldown = self.cooldown + dt
 
 		if self.cooldown >= 10 then
@@ -89,7 +84,7 @@ function Ball:moveY(distanceY)
 end
 
 function Ball:setDx(speed)
-	self.dx = math.min(speed, BALL_DX * 2)
+	self.dx = math.min(speed)
 end
 
 function Ball:setDy(speed)

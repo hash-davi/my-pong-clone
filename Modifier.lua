@@ -11,5 +11,13 @@ function Modifier:init(type)
 end
 
 function Modifier:render()
-	love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+	if self.type == "slow_motion" then
+		love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
+		love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
+	elseif self.type == "stretcher" then
+		love.graphics.setColor(241 / 255, 81 / 255, 82 / 255)
+		love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
+	end
 end
