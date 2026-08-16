@@ -236,6 +236,7 @@ end
 
 function Stage:activate(paddle)
 	paddle.playable = true
+	table.insert(self.paddles, paddle)
 end
 
 function Stage:modify(type)

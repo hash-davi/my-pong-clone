@@ -1,5 +1,8 @@
 Game = Class({})
 
+require("Stage")
+require("Menu")
+
 local possibleStates = {
 	"start",
 	"menu",
@@ -23,6 +26,8 @@ function Game:init()
 end
 
 function Game:load()
+	menu = Menu()
+
 	game_fonts = {
 		["large"] = love.graphics.newFont("font.ttf", 32),
 		["medium"] = love.graphics.newFont("font.ttf", 24),
@@ -57,7 +62,7 @@ function Game:render()
 		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 	end
 
-	if game_state == "start" then
+	if self.state == "start" then
 		love.graphics.setFont(game_fonts["large"])
 		love.graphics.printf("Pong 'til the end of times", VIRTUAL_WIDTH / 4, 50, VIRTUAL_WIDTH / 2, "center")
 
@@ -85,7 +90,7 @@ function Game:render()
 				mod:render()
 			end
 		end
-	elseif game_state == "stage" then
+	elseif self.state == "stage" then
 		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
 		stage.characters.leftPaddle:render()
@@ -112,7 +117,7 @@ function Game:render()
 	end
 end
 
-function Game:keyPressed(key)
+function Game:keypressed(key)
 	if self.state == "start" then
 		self.state = "stage"
 		stage:load()
@@ -144,7 +149,7 @@ function Game:keyPressed(key)
 		if key == "space" then
 			stage:modify("slower")
 		elseif key == "k" then
-			leftPaddle:modify("stretched")
+			stage.characters.leftPaddle:modify("stretched")
 		end
 	end
 end
