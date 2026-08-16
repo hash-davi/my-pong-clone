@@ -44,12 +44,21 @@ local possibleStates = {
 	"result",
 }
 
+local messages = {
+	"Great rally!",
+	"Nice shot!",
+}
+
 function Stage:init(characters)
 	self.characters = characters
 	self.paddles = {}
 	self.modifiers = {}
 
 	self.server = 1
+	self.score = {
+		left = 0,
+		right = 0,
+	}
 
 	self.state = "serve"
 	self.mode = "normal"
@@ -66,10 +75,8 @@ function Stage:load()
 		rightPaddle,
 	}
 
-	player1_score = 0
-	player2_score = 0
-
 	modTimer = 0
+	rallyTime = 0
 
 	self.state = "select"
 end
@@ -114,6 +121,8 @@ function Stage:update(dt)
 	rightPaddle:update(dt)
 
 	if self.state == "serve" then
+		rallyTime = 0
+
 		ball:reset()
 
 		if self.server == 1 then
@@ -123,6 +132,7 @@ function Stage:update(dt)
 		end
 	elseif self.state == "rally" then
 		modTimer = modTimer + dt
+		rallyTime = rallyTime + dt
 
 		-- Unplayable paddles -
 		if not leftPaddle.playable then
@@ -201,14 +211,14 @@ function Stage:update(dt)
 
 		-- Scoring -----------
 		if ball.x < leftPaddle.x then
-			player2_score = player2_score + 1
+			self.score.right = self.score.right + 1
 
 			love.audio.play(sounds["score_sound"])
 
 			self.server = 2
 			self.state = "serve"
 		elseif ball.x > rightPaddle.x then
-			player1_score = player1_score + 1
+			self.score.left = self.score.left + 1
 
 			love.audio.play(sounds["score_sound"])
 
@@ -216,7 +226,7 @@ function Stage:update(dt)
 			self.state = "serve"
 		end
 
-		if player1_score == 11 or player2_score == 11 then
+		if self.score.left == 11 or self.score.right == 11 then
 			self.state = "result"
 		end
 	elseif self.state == "result" then
