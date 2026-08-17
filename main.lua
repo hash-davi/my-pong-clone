@@ -26,6 +26,7 @@ end
 
 -- Setup --------------------
 function love.load()
+	-- Graphical settings ------------------------------
 	love.graphics.setDefaultFilter("nearest", "nearest")
 
 	math.randomseed(os.time())
@@ -39,9 +40,12 @@ function love.load()
 	})
 
 	push.setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, { upscale = "normal" })
+	----------------------------------------------------
 
+	-- Game instantiation ------------------------------
 	game = Game()
 
+	-- Game loading ------------------------------------
 	game:load()
 end
 

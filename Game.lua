@@ -1,7 +1,10 @@
 Game = Class({})
 
+-- Modules required ------------------------
 require("Stage")
+
 require("Menu")
+--------------------------------------------
 
 local possibleStates = {
 	"start",
@@ -69,27 +72,6 @@ function Game:render()
 		love.graphics.setFont(game_fonts["small"])
 		love.graphics.printf("Press any key to play", 0, VIRTUAL_HEIGHT - 60, VIRTUAL_WIDTH, "center")
 		-- menu:render()
-	elseif stage.state == "serve" then
-		if stage.server == 1 then
-			love.graphics.printf("Left's serve", 0, 30, VIRTUAL_WIDTH, "center")
-		elseif stage.server == 2 then
-			love.graphics.printf("Right's serve", 0, 30, VIRTUAL_WIDTH, "center")
-		end
-
-		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
-		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
-		stage.characters.leftPaddle:render()
-		stage.characters.rightPaddle:render()
-
-		stage.characters.ball:render()
-
-		stage:render()
-
-		if #stage.modifiers ~= 0 then
-			for i, mod in pairs(stage.modifiers) do
-				mod:render()
-			end
-		end
 	elseif self.state == "stage" then
 		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
@@ -105,15 +87,38 @@ function Game:render()
 				mod:render()
 			end
 		end
-	elseif stage.state == "result" then
-		if stage.server == 1 then
-			love.graphics.printf("Player 1 won!", 0, 30, VIRTUAL_WIDTH, "center")
-		elseif stage.server == 2 then
-			love.graphics.printf("Player 2 won!", 0, 30, VIRTUAL_WIDTH, "center")
-		end
 
-		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
-		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+		if stage.state == "serve" then
+			if stage.server == 1 then
+				love.graphics.printf("Left's serve", 0, 30, VIRTUAL_WIDTH, "center")
+			elseif stage.server == 2 then
+				love.graphics.printf("Right's serve", 0, 30, VIRTUAL_WIDTH, "center")
+			end
+
+			showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
+			showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+			stage.characters.leftPaddle:render()
+			stage.characters.rightPaddle:render()
+
+			stage.characters.ball:render()
+
+			stage:render()
+
+			if #stage.modifiers ~= 0 then
+				for i, mod in pairs(stage.modifiers) do
+					mod:render()
+				end
+			end
+		elseif stage.state == "result" then
+			if stage.server == 1 then
+				love.graphics.printf("Player 1 won!", 0, 30, VIRTUAL_WIDTH, "center")
+			elseif stage.server == 2 then
+				love.graphics.printf("Player 2 won!", 0, 30, VIRTUAL_WIDTH, "center")
+			end
+
+			showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
+			showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+		end
 	end
 end
 
