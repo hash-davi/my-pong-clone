@@ -80,6 +80,8 @@ function Game:render()
 
 		stage.characters.ball:render()
 
+		love.graphics.printf(stage.state, 0, 30, VIRTUAL_WIDTH, "center") -- DEBUG
+
 		stage:render()
 
 		if #stage.modifiers ~= 0 then
@@ -123,7 +125,7 @@ function Game:render()
 end
 
 function Game:keypressed(key)
-	if self.state == "start" then
+	if self.state == "start" and key ~= "return" then
 		self.state = "stage"
 		stage:load()
 	end
@@ -155,6 +157,14 @@ function Game:keypressed(key)
 			stage:modify("slower")
 		elseif key == "k" then
 			stage.characters.leftPaddle:modify("stretched")
+		elseif key == "y" then
+			stage:modify("slower")
+		elseif key == "p" then
+			stage:togglePause()
+		end
+	elseif stage.state == "paused" then
+		if key == "p" then
+			stage:togglePause()
 		end
 	end
 end

@@ -23,16 +23,19 @@ slowingFactor = 1
 local modTypes = {
 	"stretcher",
 	"slow_motion",
+	"8_ball_pong",
 }
 
 local modRanges = {
 	["slow_motion"] = "stage",
 	["stretcher"] = "paddle",
+	["8_ball_pong"] = "stage",
 }
 
 local modTypesConverter = {
 	["stretcher"] = "stretched",
 	["slow_motion"] = "slower",
+	["8_ball_pong"] = "pooled",
 }
 
 local possibleStates = {
@@ -90,35 +93,37 @@ function Stage:update(dt)
 		end
 	end
 
-	-- Left paddle ------
-	if leftPaddle.playable then
-		if love.keyboard.isDown("w") then
-			leftPaddle:setSpeed(-PLAYER_VELOCITY)
-			leftPaddle:moveY(leftPaddle.dy * dt * slowingFactor)
-		elseif love.keyboard.isDown("s") then
-			leftPaddle:setSpeed(PLAYER_VELOCITY)
-			leftPaddle:moveY(leftPaddle.dy * dt * slowingFactor)
-		else
-			leftPaddle:stop()
+	if self.state ~= "paused" then
+		-- Left paddle ------
+		if leftPaddle.playable then
+			if love.keyboard.isDown("w") then
+				leftPaddle:setSpeed(-PLAYER_VELOCITY)
+				leftPaddle:moveY(leftPaddle.dy * dt * slowingFactor)
+			elseif love.keyboard.isDown("s") then
+				leftPaddle:setSpeed(PLAYER_VELOCITY)
+				leftPaddle:moveY(leftPaddle.dy * dt * slowingFactor)
+			else
+				leftPaddle:stop()
+			end
 		end
-	end
 
-	leftPaddle:update(dt)
+		leftPaddle:update(dt)
 
-	-- Right Paddle ------
-	if rightPaddle.playable then
-		if love.keyboard.isDown("up") then
-			rightPaddle:setSpeed(-PLAYER_VELOCITY)
-			rightPaddle:moveY(rightPaddle.dy * dt * slowingFactor)
-		elseif love.keyboard.isDown("down") then
-			rightPaddle:setSpeed(PLAYER_VELOCITY)
-			rightPaddle:moveY(rightPaddle.dy * dt * slowingFactor)
-		else
-			rightPaddle:stop()
+		-- Right Paddle ------
+		if rightPaddle.playable then
+			if love.keyboard.isDown("up") then
+				rightPaddle:setSpeed(-PLAYER_VELOCITY)
+				rightPaddle:moveY(rightPaddle.dy * dt * slowingFactor)
+			elseif love.keyboard.isDown("down") then
+				rightPaddle:setSpeed(PLAYER_VELOCITY)
+				rightPaddle:moveY(rightPaddle.dy * dt * slowingFactor)
+			else
+				rightPaddle:stop()
+			end
 		end
-	end
 
-	rightPaddle:update(dt)
+		rightPaddle:update(dt)
+	end
 
 	if self.state == "serve" then
 		rallyTime = 0
@@ -247,8 +252,10 @@ function Stage:modify(type)
 		slowingFactor = 1
 		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 	elseif self.mode == "slower" then
-		slowingFactor = 0.5
+		slowingFactor = 0.2
 		love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
+		-- elseif self.mode == "pooled" then
+		-- 	self:togglePause()
 	end
 end
 
@@ -265,6 +272,18 @@ function Stage:render()
 		(rightPaddle.x + rightPaddle.width) - leftPaddle.x + 4,
 		BOTTOM_WALL - 5
 	)
+end
+
+function Stage:togglePause()
+	if self.state ~= "paused" then
+		self.state = "paused"
+		self:modify("pooled")
+		ball:modify("pooled")
+	else
+		self.state = "rally"
+		self:modify("normal")
+		ball:modify("normal")
+	end
 end
 
 function Stage:reset()
