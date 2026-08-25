@@ -1,8 +1,8 @@
 -- Modules importing and constants definitions -----------
 
-Class = require("class")
+Class = require("libs.class")
 
-local push = require("push")
+local push = require("libs.push")
 
 require("Game")
 
@@ -17,7 +17,13 @@ VIRTUAL_HEIGHT = 243
 -- Auxiliary functions -----------------------------------
 
 function love.keypressed(key)
+	love.keyPressed[key] = true
+
 	game:keypressed(key)
+end
+
+function love.keyboard.wasPressed(key)
+	return love.keyPressed[key]
 end
 
 ----------------------------------------------------------
@@ -47,6 +53,8 @@ function love.load()
 
 	-- Game loading ------------------------------------
 	game:load()
+
+	love.keysPressed = {}
 end
 
 -- Update -------------------

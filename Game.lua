@@ -1,6 +1,9 @@
 Game = Class({})
 
 -- Modules required ------------------------
+require("StateMachine")
+require("BaseState")
+
 require("Stage")
 
 require("Menu")
@@ -26,9 +29,26 @@ end
 
 function Game:init()
 	self.state = "start"
+	self.stateMachine = {
+		["start"] = function()
+			return StartScreen()
+		end,
+		["menu"] = function()
+			return Menu()
+		end,
+		["stage"] = function()
+			return Stage({
+				leftPaddle = Paddle(LEFT_ZONE, TOP_WALL, PADDLE_WIDTH, PADDLE_HEIGHT, false),
+				rightPaddle = Paddle(RIGHT_ZONE, BOTTOM_WALL - 20, PADDLE_WIDTH, PADDLE_HEIGHT, false),
+				ball = Ball(201, VIRTUAL_HEIGHT / 2, 10, 10),
+			})
+		end,
+	}
 end
 
 function Game:load()
+	self.stateMachine:transitionTo("start")
+
 	menu = Menu()
 
 	game_fonts = {
@@ -42,17 +62,18 @@ function Game:load()
 		["score_sound"] = love.audio.newSource("sounds/score.wav", "static"),
 	}
 
-	stage = Stage({
-		leftPaddle = Paddle(10, TOP_WALL, PADDLE_WIDTH, PADDLE_HEIGHT, false),
-		rightPaddle = Paddle(VIRTUAL_WIDTH - 20, BOTTOM_WALL - 20, PADDLE_WIDTH, PADDLE_HEIGHT, false),
-		ball = Ball(201, VIRTUAL_HEIGHT / 2, 10, 10),
-	})
+	-- stage = Stage({
+	-- 	leftPaddle = Paddle(10, TOP_WALL, PADDLE_WIDTH, PADDLE_HEIGHT, false),
+	-- 	rightPaddle = Paddle(VIRTUAL_WIDTH - 20, BOTTOM_WALL - 20, PADDLE_WIDTH, PADDLE_HEIGHT, false),
+	-- 	ball = Ball(201, VIRTUAL_HEIGHT / 2, 10, 10),
+	-- })
 end
 
 function Game:update(dt)
-	if self.state == "stage" then
-		stage:update(dt)
-	end
+	-- if self.state == "stage" then
+	-- 	stage:update(dt)
+	-- end
+	self.stateMachine:update(dt)
 end
 
 function Game:render()
@@ -64,6 +85,8 @@ function Game:render()
 		love.graphics.clear(58 / 255, 46 / 255, 57 / 255, 1)
 		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 	end
+
+	self.stateMachine:render()
 
 	if self.state == "start" then
 		love.graphics.setFont(game_fonts["large"])

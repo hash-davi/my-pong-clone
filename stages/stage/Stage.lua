@@ -12,6 +12,9 @@ VIRTUAL_HEIGHT = 243
 TOP_WALL = 15
 BOTTOM_WALL = VIRTUAL_HEIGHT - 25
 
+LEFT_ZONE = 10
+RIGHT_ZONE = VIRTUAL_WIDTH - 20
+
 PADDLE_WIDTH = 10
 PADDLE_HEIGHT = 30
 
@@ -64,6 +67,28 @@ function Stage:init(characters)
 	}
 
 	self.state = "serve"
+
+	self.stateMachine = StateMachine({
+		["select"] = function()
+			return Select()
+		end,
+		["serve"] = function()
+			return Serve()
+		end,
+		["rally"] = function()
+			return Rally()
+		end,
+		["paused"] = function()
+			return Paused()
+		end,
+		["countdown"] = function()
+			return Countdown()
+		end,
+		["result"] = function()
+			return Result()
+		end,
+	})
+
 	self.mode = "normal"
 	self.cooldown = 0
 end
@@ -82,6 +107,8 @@ function Stage:load()
 	rallyTime = 0
 
 	self.state = "select"
+
+	self.stateMachine:transitionTo("select")
 end
 
 function Stage:update(dt)
@@ -291,3 +318,5 @@ function Stage:reset()
 
 	self.modifiers = {}
 end
+
+function Stage:exit() end
