@@ -3,6 +3,7 @@ Game = Class({})
 -- Modules required ------------------------
 require("StateMachine")
 require("BaseState")
+require("StartScreen")
 
 require("Stage")
 
@@ -28,7 +29,7 @@ function showscore(player, x, y)
 end
 
 function Game:init()
-	self.state = "start"
+	-- self.state = "start"
 	self.stateMachine = {
 		["start"] = function()
 			return StartScreen()
@@ -48,8 +49,6 @@ end
 
 function Game:load()
 	self.stateMachine:transitionTo("start")
-
-	menu = Menu()
 
 	game_fonts = {
 		["large"] = love.graphics.newFont("font.ttf", 32),
@@ -88,14 +87,14 @@ function Game:render()
 
 	self.stateMachine:render()
 
-	if self.state == "start" then
-		love.graphics.setFont(game_fonts["large"])
-		love.graphics.printf("Pong 'til the end of times", VIRTUAL_WIDTH / 4, 50, VIRTUAL_WIDTH / 2, "center")
-
-		love.graphics.setFont(game_fonts["small"])
-		love.graphics.printf("Press any key to play", 0, VIRTUAL_HEIGHT - 60, VIRTUAL_WIDTH, "center")
-		-- menu:render()
-	elseif self.state == "stage" then
+	-- if self.state == "start" then
+	-- 	love.graphics.setFont(game_fonts["large"])
+	-- 	love.graphics.printf("Pong 'til the end of times", VIRTUAL_WIDTH / 4, 50, VIRTUAL_WIDTH / 2, "center")
+	--
+	-- 	love.graphics.setFont(game_fonts["small"])
+	-- 	love.graphics.printf("Press any key to play", 0, VIRTUAL_HEIGHT - 60, VIRTUAL_WIDTH, "center")
+	-- menu:render()
+	if self.state == "stage" then
 		showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 		showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
 		stage.characters.leftPaddle:render()

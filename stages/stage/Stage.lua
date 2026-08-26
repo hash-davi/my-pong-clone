@@ -66,7 +66,7 @@ function Stage:init(characters)
 		right = 0,
 	}
 
-	self.state = "serve"
+	-- self.state = "serve"
 
 	self.stateMachine = StateMachine({
 		["select"] = function()
@@ -106,7 +106,7 @@ function Stage:load()
 	modTimer = 0
 	rallyTime = 0
 
-	self.state = "select"
+	-- self.state = "select"
 
 	self.stateMachine:transitionTo("select")
 end
@@ -119,6 +119,8 @@ function Stage:update(dt)
 			self:modify("normal")
 		end
 	end
+
+	self.stateMachine:update(dt)
 
 	if self.state ~= "paused" then
 		-- Left paddle ------
@@ -299,6 +301,55 @@ function Stage:render()
 		(rightPaddle.x + rightPaddle.width) - leftPaddle.x + 4,
 		BOTTOM_WALL - 5
 	)
+
+	showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
+	showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+	self.characters.leftPaddle:render()
+	self.characters.rightPaddle:render()
+
+	self.characters.ball:render()
+
+	love.graphics.printf(self.state, 0, 30, VIRTUAL_WIDTH, "center") -- DEBUG
+
+	if #self.modifiers ~= 0 then
+		for i, mod in pairs(self.modifiers) do
+			mod:render()
+		end
+	end
+
+	self.stateMachine:render()
+
+	-- if self.state == "serve" then
+	-- 	if self.server == 1 then
+	-- 		love.graphics.printf("Left's serve", 0, 30, VIRTUAL_WIDTH, "center")
+	-- 	elseif self.server == 2 then
+	-- 		love.graphics.printf("Right's serve", 0, 30, VIRTUAL_WIDTH, "center")
+	-- 	end
+	--
+	-- 	showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
+	-- 	showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+	-- 	self.characters.leftPaddle:render()
+	-- 	self.characters.rightPaddle:render()
+	--
+	-- 	self.characters.ball:render()
+	--
+	-- 	self:render()
+	--
+	-- 	if #self.modifiers ~= 0 then
+	-- 		for i, mod in pairs(self.modifiers) do
+	-- 			mod:render()
+	-- 		end
+	-- 	end
+	-- elseif self.state == "result" then
+	-- 	if self.server == 1 then
+	-- 		love.graphics.printf("Player 1 won!", 0, 30, VIRTUAL_WIDTH, "center")
+	-- 	elseif self.server == 2 then
+	-- 		love.graphics.printf("Player 2 won!", 0, 30, VIRTUAL_WIDTH, "center")
+	-- 	end
+	--
+	-- 	showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
+	-- 	showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+	-- end
 end
 
 function Stage:togglePause()
