@@ -1,15 +1,5 @@
 Ball = Class({})
 
-function sign(num)
-	if num > 0 then
-		return 1
-	elseif num < 0 then
-		return -1
-	else
-		return 0
-	end
-end
-
 function Ball:init(x, y, width, height)
 	self.x = x
 	self.y = y
@@ -20,8 +10,6 @@ function Ball:init(x, y, width, height)
 	self.dy = math.random(-100, 100)
 
 	self.cooldown = 0
-
-	self.line = {}
 
 	self.StateMachine = StateMachine({
 		["static"] = function()
@@ -39,25 +27,6 @@ function Ball:load()
 end
 
 function Ball:update(dt)
-	local sy = 0
-	if self.dy > 0 then
-		sy = BOTTOM_WALL + 10 - (self.y + self.height)
-	else
-		sy = TOP_WALL - self.y
-	end
-	local deltaTime = math.abs(sy / self.dy)
-	local sx = self.dx * deltaTime
-
-	self.line = {
-		x = self.x + self.width / 2,
-		y = self.y + self.height / 2,
-		angle = math.pi / 2,
-		end_point = {
-			x = sx > 0 and self.x + self.width + sx or self.x + sx,
-			y = sy > 0 and self.y + self.height + sy or self.y + sx,
-		},
-	}
-
 	if self.mode ~= "normal" then
 		self.cooldown = self.cooldown + dt
 
@@ -69,10 +38,6 @@ end
 
 function Ball:render()
 	love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
-
-	if self.state == "moving" then
-		love.graphics.line(self.line.x, self.line.y, self.line.end_point.x, self.line.end_point.y)
-	end
 end
 
 function Ball:collidesWith(paddle)

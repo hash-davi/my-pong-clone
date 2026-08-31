@@ -1,157 +1,230 @@
 Rally = Class({ __includes = BaseState })
 
+local modTypes = {
+	"stretcher",
+	"slow_motion",
+	-- "8_ball_pong",
+}
+
+local modRanges = {
+	["slow_motion"] = "stage",
+	["stretcher"] = "paddle",
+	-- ["8_ball_pong"] = "stage",
+}
+
+local modTypesConverter = {
+	["stretcher"] = "stretched",
+	["slow_motion"] = "slower",
+	-- ["8_ball_pong"] = "pooled",
+}
+
 function Rally:load(info)
+	self.parentStateMachine = info.stateMachine
+
 	self.time = info.rallyTime
+	self.mode = info.mode
+	self.timers = info.timers
 	self.scorer = info.server
+
+	self.score = info.score
+
+	self.modifiers = info.modifiers
+	self.characters = info.characters
+	self.paddles = info.paddles
 end
 
 function Rally:update(dt)
-	Stage.timers.mod = Stage.timers.mod + dt
+	if self.mode ~= "normal" then
+		self.timers.cooldown = self.timers.cooldown + dt
+
+		if self.timers.cooldown >= 10 then
+			self:modify("normal")
+		end
+	end
+
+	self.timers.mod = self.timers.mod + dt
 	self.time = self.time + dt
 
 	-- Left paddle ------
-	if Stage.characters.leftPaddle.playable then
+	if self.characters.leftPaddle.playable then
 		if love.keyboard.isDown("w") then
-			Stage.characters.leftPaddle:setSpeed(-PLAYER_VELOCITY)
-			Stage.characters.leftPaddle:moveY(Stage.characters.leftPaddle.dy * dt * slowingFactor)
+			self.characters.leftPaddle:setSpeed(-PLAYER_VELOCITY)
+			self.characters.leftPaddle:moveY(self.characters.leftPaddle.dy * dt * slowingFactor)
 		elseif love.keyboard.isDown("s") then
-			Stage.characters.leftPaddle:setSpeed(PLAYER_VELOCITY)
-			Stage.characters.leftPaddle:moveY(Stage.characters.leftPaddle.dy * dt * slowingFactor)
+			self.characters.leftPaddle:setSpeed(PLAYER_VELOCITY)
+			self.characters.leftPaddle:moveY(self.characters.leftPaddle.dy * dt * slowingFactor)
 		else
-			Stage.characters.leftPaddle:stop()
+			self.characters.leftPaddle:stop()
 		end
 	end
 
 	-- Right Paddle ------
-	if Stage.characters.rightPaddle.playable then
+	if self.characters.rightPaddle.playable then
 		if love.keyboard.isDown("up") then
-			Stage.characters.rightPaddle:setSpeed(-PLAYER_VELOCITY)
-			Stage.characters.rightPaddle:moveY(Stage.characters.rightPaddle.dy * dt * slowingFactor)
+			self.characters.rightPaddle:setSpeed(-PLAYER_VELOCITY)
+			self.characters.rightPaddle:moveY(self.characters.rightPaddle.dy * dt * slowingFactor)
 		elseif love.keyboard.isDown("down") then
-			Stage.characters.rightPaddle:setSpeed(PLAYER_VELOCITY)
-			Stage.characters.rightPaddle:moveY(Stage.characters.rightPaddle.dy * dt * slowingFactor)
+			self.characters.rightPaddle:setSpeed(PLAYER_VELOCITY)
+			self.characters.rightPaddle:moveY(self.characters.rightPaddle.dy * dt * slowingFactor)
 		else
-			Stage.characters.rightPaddle:stop()
+			self.characters.rightPaddle:stop()
 		end
 	end
 
-	for i, paddle in pairs(Stage.paddles) do
+	for i, paddle in pairs(self.paddles) do
 		paddle:update(dt)
 	end
 
 	-- Unplayable paddles -
-	if not Stage.characters.leftPaddle.playable then
-		if Stage.characters.ball.dx < 0 and Stage.characters.ball.x <= VIRTUAL_WIDTH / 2 then
-			Stage.characters.leftPaddle:track(Stage.characters.ball, dt)
+	if not self.characters.leftPaddle.playable then
+		if self.characters.ball.dx < 0 and self.characters.ball.x <= VIRTUAL_WIDTH / 2 then
+			self.characters.leftPaddle:track(self.characters.ball, dt)
 		else
-			Stage.characters.leftPaddle:stop()
+			self.characters.leftPaddle:stop()
 		end
 	end
 
-	if not Stage.characters.rightPaddle.playable then
-		if Stage.characters.ball.dx > 0 and Stage.characters.ball.x >= VIRTUAL_WIDTH / 2 then
-			Stage.characters.rightPaddle:track(Stage.characters.ball, dt)
+	if not self.characters.rightPaddle.playable then
+		if self.characters.ball.dx > 0 and self.characters.ball.x >= VIRTUAL_WIDTH / 2 then
+			self.characters.rightPaddle:track(self.characters.ball, dt)
 		else
-			Stage.characters.rightPaddle:stop()
+			self.characters.rightPaddle:stop()
 		end
 	end
 
-	Stage.characters.ball:setDx(Stage.characters.ball.dx)
-	Stage.characters.ball:moveX(Stage.characters.ball.dx * dt * slowingFactor)
-	Stage.characters.ball:setDy(Stage.characters.ball.dy)
-	Stage.characters.ball:moveY(Stage.characters.ball.dy * dt * slowingFactor)
+	self.characters.ball:setDx(self.characters.ball.dx)
+	self.characters.ball:moveX(self.characters.ball.dx * dt * slowingFactor)
+	self.characters.ball:setDy(self.characters.ball.dy)
+	self.characters.ball:moveY(self.characters.ball.dy * dt * slowingFactor)
 
-	-- Stage.characters.ball --------------
-	if Stage.characters.ball:collidesWith(Stage.characters.leftPaddle) then
-		Stage.characters.ball:setDx(-Stage.characters.ball.dx * 1.05)
-		Stage.characters.ball:setDy(Stage.characters.ball.dy + Stage.characters.leftPaddle.dy / 2)
-		Stage.characters.ball:moveX(
-			Stage.characters.leftPaddle.x + Stage.characters.leftPaddle.width + 1 - Stage.characters.ball.x
+	-- self.characters.ball --------------
+	if self.characters.ball:collidesWith(self.characters.leftPaddle) then
+		self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
+		self.characters.ball:setDy(self.characters.ball.dy + self.characters.leftPaddle.dy / 2)
+		self.characters.ball:moveX(
+			self.characters.leftPaddle.x + self.characters.leftPaddle.width + 1 - self.characters.ball.x
 		)
 		self.scorer = 1
 
 		love.audio.play(sounds["hit_sound"])
 	end
-	if Stage.characters.ball:collidesWith(Stage.characters.rightPaddle) then
-		Stage.characters.ball:setDx(-Stage.characters.ball.dx * 1.05)
-		Stage.characters.ball:setDy(Stage.characters.ball.dy + Stage.characters.rightPaddle.dy / 2)
-		Stage.characters.ball:moveX(
-			Stage.characters.rightPaddle.x - Stage.characters.ball.width - 1 - Stage.characters.ball.x
+	if self.characters.ball:collidesWith(self.characters.rightPaddle) then
+		self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
+		self.characters.ball:setDy(self.characters.ball.dy + self.characters.rightPaddle.dy / 2)
+		self.characters.ball:moveX(
+			self.characters.rightPaddle.x - self.characters.ball.width - 1 - self.characters.ball.x
 		)
 		self.scorer = 2
 
 		love.audio.play(sounds["hit_sound"])
 	end
 
-	for i, mod in pairs(Stage.modifiers) do
-		if Stage.characters.ball:collidesWith(mod) then
+	for i, mod in pairs(self.modifiers) do
+		if self.characters.ball:collidesWith(mod) then
 			if modRanges[mod.type] == "paddle" then
 				if self.scorer == 1 then
-					Stage.characters.leftPaddle:modify(modTypesConverter[mod.type], dt)
+					self.characters.leftPaddle:modify(modTypesConverter[mod.type], dt)
 				elseif self.scorer == 2 then
-					Stage.characters.rightPaddle:modify(modTypesConverter[mod.type], dt)
+					self.characters.rightPaddle:modify(modTypesConverter[mod.type], dt)
 				end
 			elseif modRanges[mod.type] == "stage" then
-				Stage:modify(modTypesConverter[mod.type])
+				self:modify(modTypesConverter[mod.type])
 			end
 
-			table.remove(Stage.modifiers, i)
+			table.remove(self.modifiers, i)
 		end
 	end
 
 	if
-		Stage.characters.ball.y + Stage.characters.ball.height >= BOTTOM_WALL + 10
-		or Stage.characters.ball.y <= TOP_WALL
+		self.characters.ball.y + self.characters.ball.height >= BOTTOM_WALL + 10
+		or self.characters.ball.y <= TOP_WALL
 	then
-		Stage.characters.ball:setDy(-Stage.characters.ball.dy)
+		self.characters.ball:setDy(-self.characters.ball.dy)
 
-		if Stage.characters.ball.y + Stage.characters.ball.height >= BOTTOM_WALL + 10 then
-			Stage.characters.ball:moveY(-1)
-		elseif Stage.characters.ball.y <= TOP_WALL then
-			Stage.characters.ball:moveY(1)
+		if self.characters.ball.y + self.characters.ball.height >= BOTTOM_WALL + 10 then
+			self.characters.ball:moveY(-1)
+		elseif self.characters.ball.y <= TOP_WALL then
+			self.characters.ball:moveY(1)
 		end
 
 		love.audio.play(sounds["hit_sound"])
 	end
 
-	Stage.characters.ball:update(dt)
+	self.characters.ball:update(dt)
 
-	if modTimer >= 10 and #Stage.modifiers <= 2 then
-		Stage.timers.mod = 0
-		table.insert(Stage.modifiers, Modifier(modTypes[math.random(#modTypes)]))
+	if self.timers.mod >= 10 and #self.modifiers <= 2 then
+		self.timers.mod = 0
+		table.insert(self.modifiers, Modifier(modTypes[math.random(#modTypes)]))
 	end
 
 	-- Scoring -----------
-	if Stage.characters.ball.x < Stage.characters.leftPaddle.x then
-		Stage.score.right = Stage.score.right + 1
+	if self.characters.ball.x < LEFT_ZONE then
+		self.scorer = 2
+		self.score.right = self.score.right + 1
 
 		love.audio.play(sounds["score_sound"])
 
-		Stage.stateMachine:transitionTo("serve", { server = self.scorer })
-	elseif Stage.characters.ball.x > Stage.characters.rightPaddle.x then
-		Stage.score.left = Stage.score.left + 1
+		self.parentStateMachine:transitionTo("serve", {
+			stateMachine = self.parentStateMachine,
+			server = self.scorer,
+			timers = self.timers,
+			mode = self.mode,
+			score = self.score,
+			modifiers = self.modifiers,
+			characters = self.characters,
+			paddles = self.paddles,
+		})
+	elseif self.characters.ball.x > RIGHT_ZONE - self.characters.rightPaddle.width then
+		self.scorer = 1
+		self.score.left = self.score.left + 1
 
 		love.audio.play(sounds["score_sound"])
 
-		Stage.stateMachine:transitionTo("serve", { server = self.scorer })
+		self.parentStateMachine:transitionTo("serve", {
+			stateMachine = self.parentStateMachine,
+			server = self.scorer,
+			timers = self.timers,
+			mode = self.mode,
+			score = self.score,
+			modifiers = self.modifiers,
+			characters = self.characters,
+			paddles = self.paddles,
+		})
 	end
 
-	if Stage.score.left == 11 or Stage.score.right == 11 then
-		Stage.stateMachine:transitionTo("result", { winner = self.scorer })
+	if self.score.left == 11 or self.score.right == 1 then
+		self.parentStateMachine:transitionTo("result", { winner = self.scorer })
 	end
 end
 
 function Rally:render()
-	if #Stage.modifiers ~= 0 then
-		for i, mod in pairs(Stage.modifiers) do
+	if #self.modifiers ~= 0 then
+		for i, mod in pairs(self.modifiers) do
 			mod:render()
 		end
 	end
 
-	for i, characters in pairs(Stage.characters) do
-		characters:render()
+	for i, character in pairs(self.characters) do
+		character:render()
 	end
+
+	-- DEBUG ------
+	-- love.graphics.printf(self.timers.cooldown, 0, 30, VIRTUAL_WIDTH / 2, "center")
+	-- love.graphics.printf(self.mode, 0, 30, VIRTUAL_WIDTH / 2, "center")
 
 	showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 	showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)
+end
+
+function Rally:modify(type)
+	self.mode = type
+
+	if self.mode == "normal" then
+		self.timers.cooldown = 0
+		slowingFactor = 1
+		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
+	elseif self.mode == "slower" then
+		slowingFactor = 0.2
+		love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
+	end
 end

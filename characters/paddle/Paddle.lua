@@ -1,14 +1,6 @@
 Paddle = Class({})
 
-function sign(num)
-	if num > 0 then
-		return 1
-	elseif num < 0 then
-		return -1
-	else
-		return 0
-	end
-end
+require("characters.paddle.Static")
 
 function Paddle:init(x, y, width, height, playable)
 	self.x = x
@@ -20,7 +12,7 @@ function Paddle:init(x, y, width, height, playable)
 
 	self.cooldown = 0
 
-	self.StateMachine = StateMachine({
+	self.stateMachine = StateMachine({
 		["static"] = function()
 			return Static()
 		end,
@@ -32,7 +24,7 @@ function Paddle:init(x, y, width, height, playable)
 end
 
 function Paddle:load()
-	self.StateMachine:transitionTo("static")
+	self.stateMachine:transitionTo("static")
 end
 
 function Paddle:render()
@@ -44,7 +36,7 @@ function Paddle:render()
 end
 
 function Paddle:update(dt)
-	self.StateMachine:update(dt)
+	self.stateMachine:update(dt)
 
 	if self.mode ~= "normal" then
 		self.cooldown = self.cooldown + dt

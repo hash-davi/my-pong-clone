@@ -5,8 +5,6 @@ function Result:load(info)
 end
 
 function Result:update(dt)
-	Stage:reset()
-
 	if love.keyboard.wasPressed("return") then
 		Game.stateMachine:transitionTo("start")
 	end
