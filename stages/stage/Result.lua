@@ -1,9 +1,21 @@
 Result = Class({ __includes = BaseState })
 
+function Result:load(info)
+	self.winner = info.winner
+end
+
+function Result:update(dt)
+	Stage:reset()
+
+	if love.keyboard.wasPressed("return") then
+		Game.stateMachine:transitionTo("start")
+	end
+end
+
 function Result:render()
-	if stage.server == 1 then
+	if self.winner == 1 then
 		love.graphics.printf("Player 1 won!", 0, 30, VIRTUAL_WIDTH, "center")
-	elseif stage.server == 2 then
+	elseif self.winner == 2 then
 		love.graphics.printf("Player 2 won!", 0, 30, VIRTUAL_WIDTH, "center")
 	end
 

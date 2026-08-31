@@ -1,10 +1,6 @@
 BaseState = Class({})
 
-function BaseState:init() end
-
-function BaseState:keypressed() end
-
-function BaseState:load() end
+function BaseState:load(info) end
 
 function BaseState:update(dt) end
 

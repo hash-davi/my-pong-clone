@@ -20,8 +20,19 @@ function Paddle:init(x, y, width, height, playable)
 
 	self.cooldown = 0
 
-	self.state = "static"
+	self.StateMachine = StateMachine({
+		["static"] = function()
+			return Static()
+		end,
+		["dynamic"] = function()
+			return Dynamic()
+		end,
+	})
 	self.mode = "normal"
+end
+
+function Paddle:load()
+	self.StateMachine:transitionTo("static")
 end
 
 function Paddle:render()
@@ -33,9 +44,7 @@ function Paddle:render()
 end
 
 function Paddle:update(dt)
-	if self.state == "static" then
-		self:stop()
-	end
+	self.StateMachine:update(dt)
 
 	if self.mode ~= "normal" then
 		self.cooldown = self.cooldown + dt

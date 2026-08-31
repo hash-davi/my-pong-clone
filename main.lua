@@ -17,13 +17,18 @@ VIRTUAL_HEIGHT = 243
 -- Auxiliary functions -----------------------------------
 
 function love.keypressed(key)
-	love.keyPressed[key] = true
+	love.keysPressed[key] = true
 
-	game:keypressed(key)
+	Game:keypressed(key)
 end
 
 function love.keyboard.wasPressed(key)
-	return love.keyPressed[key]
+	-- if love.keysPressed[key] then
+	-- 	return true
+	-- else
+	-- 	return false
+	-- end
+	return love.keysPressed[key]
 end
 
 ----------------------------------------------------------
@@ -49,24 +54,24 @@ function love.load()
 	----------------------------------------------------
 
 	-- Game instantiation ------------------------------
-	game = Game()
+	Game = Game()
 
 	-- Game loading ------------------------------------
-	game:load()
+	Game:load()
 
 	love.keysPressed = {}
 end
 
 -- Update -------------------
 function love.update(dt)
-	game:update(dt)
+	Game:update(dt)
 end
 
 -- Render -------------------
 function love.draw()
 	push.start()
 
-	game:render()
+	Game:render()
 
 	push.finish()
 end

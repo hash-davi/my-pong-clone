@@ -23,8 +23,19 @@ function Ball:init(x, y, width, height)
 
 	self.line = {}
 
-	self.state = "static"
+	self.StateMachine = StateMachine({
+		["static"] = function()
+			return Static()
+		end,
+		["dynamic"] = function()
+			return Dynamic()
+		end,
+	})
 	self.mode = "normal"
+end
+
+function Ball:load()
+	self.StateMachine:transitionTo("static")
 end
 
 function Ball:update(dt)

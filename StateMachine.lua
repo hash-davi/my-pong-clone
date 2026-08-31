@@ -13,7 +13,7 @@ function StateMachine:init(states)
 	self.currentState = self.empty
 end
 
-function StateMachine:transtitionTo(targetState, info)
+function StateMachine:transitionTo(targetState, info)
 	assert(self.states[targetState])
 
 	self.currentState:exit()
