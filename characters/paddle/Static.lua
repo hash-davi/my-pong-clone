@@ -1,7 +1,36 @@
-Static = Class({ __include = BaseState })
-
-function Static:load(info) end
-
-function Static:update(dt)
-	-- Stage.characters.leftPaddle:stop()
-end
+-- Static = Class({ __includes = BaseState })
+--
+-- function Static:load(info)
+-- 	self.parentStateMachine = info.stateMachine
+-- 	self.parent = info.parent
+-- 	self.stageCharacters = info.stageCharacters
+-- end
+--
+-- function Static:update(dt)
+-- 	if self.parent.side == 1 then
+-- 		if love.keyboard.isDown("w") or love.keyboard.isDown("s") then
+-- 			self.parentStateMachine:transitionTo(
+-- 				"dynamic",
+-- 				{ stateMachine = self.parentStateMachine, parent = self.parent, stageCharacters = self.stageCharacters }
+-- 			)
+-- 		end
+-- 	else
+-- 		if love.keyboard.isDown("up") or love.keyboard.isDown("down") then
+-- 			self.parentStateMachine:transitionTo(
+-- 				"dynamic",
+-- 				{ stateMachine = self.parentStateMachine, parent = self.parent, stageCharacters = self.stageCharacters }
+-- 			)
+-- 		end
+-- 	end
+-- end
+--
+-- function Static:render()
+-- 	-- love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
+-- 	love.graphics.rectangle(
+-- 		"fill",
+-- 		self.parent.position.x,
+-- 		self.parent.position.y,
+-- 		self.parent.dimensions.width,
+-- 		self.parent.dimensions.height
+-- 	)
+-- end

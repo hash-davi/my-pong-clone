@@ -1,17 +1,17 @@
 Ball = Class({})
 
-function Ball:init(x, y, width, height)
-	self.x = x
-	self.y = y
-	self.width = width
-	self.height = height
+require("characters.ball.Static")
+
+function Ball:init(position, dimensions)
+	self.position = position
+	self.dimensions = dimensions
 
 	self.dx = BALL_DX
 	self.dy = math.random(-100, 100)
 
 	self.cooldown = 0
 
-	self.StateMachine = StateMachine({
+	self.stateMachine = StateMachine({
 		["static"] = function()
 			return Static()
 		end,
@@ -22,8 +22,12 @@ function Ball:init(x, y, width, height)
 	self.mode = "normal"
 end
 
-function Ball:load()
-	self.StateMachine:transitionTo("static")
+function Ball:load(info)
+	StageCharacters = info.stageCharacters
+	self.stateMachine:transitionTo(
+		"static",
+		{ stateMachine = self.stateMachine, parent = self, stageCharacters = StageCharacters }
+	)
 end
 
 function Ball:update(dt)
@@ -37,15 +41,21 @@ function Ball:update(dt)
 end
 
 function Ball:render()
-	love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+	love.graphics.rectangle("fill", self.position.x, self.position.y, self.dimensions.width, self.dimensions.height)
 end
 
 function Ball:collidesWith(paddle)
-	if self.x > paddle.x + paddle.width or self.x + self.width < paddle.x then
+	if
+		self.position.x > paddle.position.x + paddle.dimensions.width
+		or self.position.x + self.dimensions.width < paddle.position.x
+	then
 		return false
 	end
 
-	if self.y > paddle.y + paddle.height or self.y + self.height < paddle.y then
+	if
+		self.position.y > paddle.position.y + paddle.dimensions.height
+		or self.position.y + self.dimensions.height < paddle.position.y
+	then
 		return false
 	end
 
@@ -53,11 +63,11 @@ function Ball:collidesWith(paddle)
 end
 
 function Ball:reset()
-	self.x = 201
-	self.y = VIRTUAL_HEIGHT / 2
+	self.position.x = 201
+	self.position.y = VIRTUAL_HEIGHT / 2
 	self.dx = BALL_DX
 	self.dy = math.random(-100, 100)
-	self.state = "static"
+	-- self.state = "static"
 end
 
 function Ball:modify(type)
@@ -69,18 +79,18 @@ function Ball:modify(type)
 end
 
 function Ball:moveX(distanceX)
-	self.state = "moving"
+	-- self.state = "moving"
 
 	if distanceX ~= 0 then
-		self.x = self.x + distanceX
+		self.position.x = self.position.x + distanceX
 	end
 end
 
 function Ball:moveY(distanceY)
-	self.state = "moving"
+	-- self.state = "moving"
 
 	if distanceY ~= 0 then
-		self.y = self.y + distanceY
+		self.position.y = self.position.y + distanceY
 	end
 end
 

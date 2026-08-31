@@ -1,0 +1,81 @@
+-- Dynamic = Class({ __includes = BaseState })
+--
+-- function Dynamic:load(info)
+-- 	self.parentStateMachine = info.stateMachine
+-- 	self.parent = info.parent
+--
+-- 	self.stageCharacters = info.stageCharacters
+-- end
+--
+-- function Dynamic:update(dt)
+-- 	if self.parent.side == 1 then
+-- 		if self.parent.playable then
+-- 			if love.keyboard.isDown("w") then
+-- 				self.parent:setSpeed(-PLAYER_VELOCITY)
+-- 				-- self.parent:moveY(self.parent.dy * dt * slowingFactor)
+-- 			elseif love.keyboard.isDown("s") then
+-- 				self.parent:setSpeed(PLAYER_VELOCITY)
+-- 				-- self.parent:moveY(self.parent.dy * dt * slowingFactor)
+-- 			else
+-- 				self.parent:stop()
+-- 			end
+-- 		else
+-- 			if self.stageCharacters.ball.dx < 0 and self.stageCharacters.ball.dimensions.x <= VIRTUAL_WIDTH / 2 then
+-- 				self.parent:track(self.stageCharacters.ball, dt)
+-- 			else
+-- 				self.parent:stop()
+-- 			end
+-- 		end
+-- 	elseif self.parent.side == 2 then
+-- 		if self.parent.playable then
+-- 			if love.keyboard.isDown("up") then
+-- 				self.parent:setSpeed(-PLAYER_VELOCITY)
+-- 				-- self.parent:moveY(self.parent.dy * dt * slowingFactor)
+-- 			elseif love.keyboard.isDown("down") then
+-- 				self.parent:setSpeed(PLAYER_VELOCITY)
+-- 				-- self.parent:moveY(self.parent.dy * dt * slowingFactor)
+-- 			else
+-- 				self.parent:stop()
+-- 			end
+-- 		else
+-- 			if self.stageCharacters.ball.dx > 0 and self.stageCharacters.ball.dimensions.x >= VIRTUAL_WIDTH / 2 then
+-- 				self.parent:track(self.stageCharacters.ball, dt)
+-- 			else
+-- 				self.parent:stop()
+-- 			end
+-- 		end
+-- 	end
+--
+-- 	self.parent:moveY(self.parent.dy * dt * slowingFactor)
+-- end
+--
+-- function Dynamic:track(ball, dt)
+-- 	local ball_sx = self.parent.position.x - (ball.x + ball.width)
+-- 	local ball_dt = (ball.dx / ball_sx) * dt
+--
+-- 	local ball_sy = ball.dy * ball_dt
+-- 	local final_position = {
+-- 		x = ball.x + ball.width + ball_sx,
+-- 		y = ball.y + ball.height + ball_sy,
+-- 	}
+--
+-- 	if final_position.y > self.parent.position.y + self.parent.dimensions.height then -- If the ball will fall below the paddle
+-- 		self.parent:setSpeed(PLAYER_VELOCITY)
+-- 		-- self.parent:moveY(self.dy * dt * slowingFactor)
+-- 	elseif final_position.y < self.parent.position.y then -- If the ball will fall above the paddle
+-- 		self.parent:setSpeed(-PLAYER_VELOCITY)
+-- 		-- self.parent:moveY(self.dy * dt * slowingFactor)
+-- 	else
+-- 		self.parent:stop()
+-- 	end
+-- end
+--
+-- function Dynamic:render()
+-- 	love.graphics.rectangle(
+-- 		"fill",
+-- 		self.parent.position.x,
+-- 		self.parent.position.y,
+-- 		self.parent.dimensions.width,
+-- 		self.parent.dimensions.height
+-- 	)
+-- end

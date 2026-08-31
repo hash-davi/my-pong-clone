@@ -77,7 +77,7 @@ function Rally:update(dt)
 
 	-- Unplayable paddles -
 	if not self.characters.leftPaddle.playable then
-		if self.characters.ball.dx < 0 and self.characters.ball.x <= VIRTUAL_WIDTH / 2 then
+		if self.characters.ball.dx < 0 and self.characters.ball.position.x <= VIRTUAL_WIDTH / 2 then
 			self.characters.leftPaddle:track(self.characters.ball, dt)
 		else
 			self.characters.leftPaddle:stop()
@@ -85,7 +85,7 @@ function Rally:update(dt)
 	end
 
 	if not self.characters.rightPaddle.playable then
-		if self.characters.ball.dx > 0 and self.characters.ball.x >= VIRTUAL_WIDTH / 2 then
+		if self.characters.ball.dx > 0 and self.characters.ball.position.x >= VIRTUAL_WIDTH / 2 then
 			self.characters.rightPaddle:track(self.characters.ball, dt)
 		else
 			self.characters.rightPaddle:stop()
@@ -102,7 +102,10 @@ function Rally:update(dt)
 		self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
 		self.characters.ball:setDy(self.characters.ball.dy + self.characters.leftPaddle.dy / 2)
 		self.characters.ball:moveX(
-			self.characters.leftPaddle.x + self.characters.leftPaddle.width + 1 - self.characters.ball.x
+			self.characters.leftPaddle.position.x
+				+ self.characters.leftPaddle.dimensions.width
+				+ 1
+				- self.characters.ball.position.x
 		)
 		self.scorer = 1
 
@@ -112,7 +115,10 @@ function Rally:update(dt)
 		self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
 		self.characters.ball:setDy(self.characters.ball.dy + self.characters.rightPaddle.dy / 2)
 		self.characters.ball:moveX(
-			self.characters.rightPaddle.x - self.characters.ball.width - 1 - self.characters.ball.x
+			self.characters.rightPaddle.position.x
+				- self.characters.ball.dimensions.width
+				- 1
+				- self.characters.ball.position.x
 		)
 		self.scorer = 2
 
@@ -136,14 +142,14 @@ function Rally:update(dt)
 	end
 
 	if
-		self.characters.ball.y + self.characters.ball.height >= BOTTOM_WALL + 10
-		or self.characters.ball.y <= TOP_WALL
+		self.characters.ball.position.y + self.characters.ball.dimensions.height >= BOTTOM_WALL + 10
+		or self.characters.ball.position.y <= TOP_WALL
 	then
 		self.characters.ball:setDy(-self.characters.ball.dy)
 
-		if self.characters.ball.y + self.characters.ball.height >= BOTTOM_WALL + 10 then
+		if self.characters.ball.position.y + self.characters.ball.dimensions.height >= BOTTOM_WALL + 10 then
 			self.characters.ball:moveY(-1)
-		elseif self.characters.ball.y <= TOP_WALL then
+		elseif self.characters.ball.position.y <= TOP_WALL then
 			self.characters.ball:moveY(1)
 		end
 
@@ -158,7 +164,7 @@ function Rally:update(dt)
 	end
 
 	-- Scoring -----------
-	if self.characters.ball.x < LEFT_ZONE then
+	if self.characters.ball.position.x < LEFT_ZONE then
 		self.scorer = 2
 		self.score.right = self.score.right + 1
 
@@ -174,7 +180,7 @@ function Rally:update(dt)
 			characters = self.characters,
 			paddles = self.paddles,
 		})
-	elseif self.characters.ball.x > RIGHT_ZONE - self.characters.rightPaddle.width then
+	elseif self.characters.ball.position.x > RIGHT_ZONE - self.characters.rightPaddle.dimensions.width then
 		self.scorer = 1
 		self.score.left = self.score.left + 1
 

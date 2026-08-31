@@ -75,7 +75,7 @@ function Stage:load()
 	}
 
 	for i, character in pairs(self.characters) do
-		character:load()
+		character:load({ stageCharacters = self.characters })
 	end
 
 	self.stateMachine:transitionTo("select", {

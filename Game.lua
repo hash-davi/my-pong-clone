@@ -33,9 +33,19 @@ function Game:init()
 		end,
 		["stage"] = function()
 			return Stage({
-				leftPaddle = Paddle(LEFT_ZONE, TOP_WALL, PADDLE_WIDTH, PADDLE_HEIGHT, false),
-				rightPaddle = Paddle(RIGHT_ZONE - PADDLE_WIDTH, BOTTOM_WALL - 20, PADDLE_WIDTH, PADDLE_HEIGHT, false),
-				ball = Ball(201, VIRTUAL_HEIGHT / 2, 10, 10),
+				leftPaddle = Paddle(
+					{ x = LEFT_ZONE, y = TOP_WALL },
+					{ width = PADDLE_WIDTH, height = PADDLE_HEIGHT },
+					false,
+					1
+				),
+				rightPaddle = Paddle(
+					{ x = RIGHT_ZONE - PADDLE_WIDTH, y = BOTTOM_WALL - 20 },
+					{ width = PADDLE_WIDTH, height = PADDLE_HEIGHT },
+					false,
+					2
+				),
+				ball = Ball({ x = 201, y = VIRTUAL_HEIGHT / 2 }, { width = 10, height = 10 }),
 			})
 		end,
 	})
