@@ -1,6 +1,6 @@
 Ball = Class({})
 
-require("characters.ball.Static")
+require("characters.ball.Ball_Static")
 
 function Ball:init(position, dimensions)
 	self.position = position
@@ -13,7 +13,7 @@ function Ball:init(position, dimensions)
 
 	self.stateMachine = StateMachine({
 		["static"] = function()
-			return Static()
+			return Ball_Static()
 		end,
 		["dynamic"] = function()
 			return Dynamic()

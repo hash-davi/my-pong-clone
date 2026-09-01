@@ -11,6 +11,7 @@ function Result:update(dt)
 end
 
 function Result:render()
+	love.graphics.setFont(Game_fonts["large"])
 	if self.winner == 1 then
 		love.graphics.printf("Player 1 won!", 0, 30, VIRTUAL_WIDTH, "center")
 	elseif self.winner == 2 then

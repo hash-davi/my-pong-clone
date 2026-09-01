@@ -18,9 +18,11 @@ local modTypesConverter = {
 	-- ["8_ball_pong"] = "pooled",
 }
 
-function Rally:load(info)
-	self.parentStateMachine = info.stateMachine
+function Rally:init(stage)
+	self.stage = stage
+end
 
+function Rally:load(info)
 	self.time = info.rallyTime
 	self.mode = info.mode
 	self.timers = info.timers
@@ -34,62 +36,19 @@ function Rally:load(info)
 end
 
 function Rally:update(dt)
-	if self.mode ~= "normal" then
+	if self.stage.mode ~= "normal" then
 		self.timers.cooldown = self.timers.cooldown + dt
 
 		if self.timers.cooldown >= 10 then
-			self:modify("normal")
+			self.stage:modify("normal")
 		end
 	end
 
 	self.timers.mod = self.timers.mod + dt
 	self.time = self.time + dt
 
-	-- Left paddle ------
-	if self.characters.leftPaddle.playable then
-		if love.keyboard.isDown("w") then
-			self.characters.leftPaddle:setSpeed(-PLAYER_VELOCITY)
-			self.characters.leftPaddle:moveY(self.characters.leftPaddle.dy * dt * slowingFactor)
-		elseif love.keyboard.isDown("s") then
-			self.characters.leftPaddle:setSpeed(PLAYER_VELOCITY)
-			self.characters.leftPaddle:moveY(self.characters.leftPaddle.dy * dt * slowingFactor)
-		else
-			self.characters.leftPaddle:stop()
-		end
-	end
-
-	-- Right Paddle ------
-	if self.characters.rightPaddle.playable then
-		if love.keyboard.isDown("up") then
-			self.characters.rightPaddle:setSpeed(-PLAYER_VELOCITY)
-			self.characters.rightPaddle:moveY(self.characters.rightPaddle.dy * dt * slowingFactor)
-		elseif love.keyboard.isDown("down") then
-			self.characters.rightPaddle:setSpeed(PLAYER_VELOCITY)
-			self.characters.rightPaddle:moveY(self.characters.rightPaddle.dy * dt * slowingFactor)
-		else
-			self.characters.rightPaddle:stop()
-		end
-	end
-
 	for i, paddle in pairs(self.paddles) do
 		paddle:update(dt)
-	end
-
-	-- Unplayable paddles -
-	if not self.characters.leftPaddle.playable then
-		if self.characters.ball.dx < 0 and self.characters.ball.position.x <= VIRTUAL_WIDTH / 2 then
-			self.characters.leftPaddle:track(self.characters.ball, dt)
-		else
-			self.characters.leftPaddle:stop()
-		end
-	end
-
-	if not self.characters.rightPaddle.playable then
-		if self.characters.ball.dx > 0 and self.characters.ball.position.x >= VIRTUAL_WIDTH / 2 then
-			self.characters.rightPaddle:track(self.characters.ball, dt)
-		else
-			self.characters.rightPaddle:stop()
-		end
 	end
 
 	self.characters.ball:setDx(self.characters.ball.dx)
@@ -109,7 +68,7 @@ function Rally:update(dt)
 		)
 		self.scorer = 1
 
-		love.audio.play(sounds["hit_sound"])
+		love.audio.play(Game_sounds["hit_sound"])
 	end
 	if self.characters.ball:collidesWith(self.characters.rightPaddle) then
 		self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
@@ -122,7 +81,7 @@ function Rally:update(dt)
 		)
 		self.scorer = 2
 
-		love.audio.play(sounds["hit_sound"])
+		love.audio.play(Game_sounds["hit_sound"])
 	end
 
 	for i, mod in pairs(self.modifiers) do
@@ -134,7 +93,7 @@ function Rally:update(dt)
 					self.characters.rightPaddle:modify(modTypesConverter[mod.type], dt)
 				end
 			elseif modRanges[mod.type] == "stage" then
-				self:modify(modTypesConverter[mod.type])
+				self.stage:modify(modTypesConverter[mod.type])
 			end
 
 			table.remove(self.modifiers, i)
@@ -153,7 +112,7 @@ function Rally:update(dt)
 			self.characters.ball:moveY(1)
 		end
 
-		love.audio.play(sounds["hit_sound"])
+		love.audio.play(Game_sounds["hit_sound"])
 	end
 
 	self.characters.ball:update(dt)
@@ -168,10 +127,9 @@ function Rally:update(dt)
 		self.scorer = 2
 		self.score.right = self.score.right + 1
 
-		love.audio.play(sounds["score_sound"])
+		love.audio.play(Game_sounds["score_sound"])
 
-		self.parentStateMachine:transitionTo("serve", {
-			stateMachine = self.parentStateMachine,
+		self.stage.stateMachine:transitionTo("serve", {
 			server = self.scorer,
 			timers = self.timers,
 			mode = self.mode,
@@ -184,10 +142,9 @@ function Rally:update(dt)
 		self.scorer = 1
 		self.score.left = self.score.left + 1
 
-		love.audio.play(sounds["score_sound"])
+		love.audio.play(Game_sounds["score_sound"])
 
-		self.parentStateMachine:transitionTo("serve", {
-			stateMachine = self.parentStateMachine,
+		self.stage.stateMachine:transitionTo("serve", {
 			server = self.scorer,
 			timers = self.timers,
 			mode = self.mode,
@@ -198,8 +155,8 @@ function Rally:update(dt)
 		})
 	end
 
-	if self.score.left == 11 or self.score.right == 1 then
-		self.parentStateMachine:transitionTo("result", { winner = self.scorer })
+	if self.score.left == 11 or self.score.right == 11 then
+		self.stage.stateMachine:transitionTo("result", { winner = self.scorer })
 	end
 end
 
@@ -213,10 +170,6 @@ function Rally:render()
 	for i, character in pairs(self.characters) do
 		character:render()
 	end
-
-	-- DEBUG ------
-	-- love.graphics.printf(self.timers.cooldown, 0, 30, VIRTUAL_WIDTH / 2, "center")
-	-- love.graphics.printf(self.mode, 0, 30, VIRTUAL_WIDTH / 2, "center")
 
 	showscore(1, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 2 - 50)
 	showscore(2, VIRTUAL_WIDTH / 2 + 15, VIRTUAL_HEIGHT / 2 - 50)

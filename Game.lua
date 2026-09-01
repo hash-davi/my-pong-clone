@@ -19,7 +19,7 @@ function showscore(player, x, y)
 		score = Game.stateMachine.currentState.score.right
 	end
 
-	love.graphics.setFont(game_fonts["large"])
+	love.graphics.setFont(Game_fonts["large"])
 	love.graphics.print(tostring(score), x, y)
 end
 
@@ -54,35 +54,23 @@ end
 function Game:load()
 	self.stateMachine:transitionTo("start")
 
-	game_fonts = {
+	Game_fonts = {
 		["large"] = love.graphics.newFont("font.ttf", 32),
 		["medium"] = love.graphics.newFont("font.ttf", 24),
 		["small"] = love.graphics.newFont("font.ttf", 16),
 	}
 
-	sounds = {
+	Game_sounds = {
 		["hit_sound"] = love.audio.newSource("sounds/sound.wav", "static"),
 		["score_sound"] = love.audio.newSource("sounds/score.wav", "static"),
 	}
 end
 
 function Game:update(dt)
-	-- if self.state == "stage" then
-	-- 	stage:update(dt)
-	-- end
 	self.stateMachine:update(dt)
 end
 
 function Game:render()
-	-- Graphics ---------
-	-- if stage.mode == "slower" then
-	-- 	love.graphics.clear(30 / 255, 85 / 255, 92 / 255, 1)
-	-- 	love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
-	-- else
-	-- 	love.graphics.clear(58 / 255, 46 / 255, 57 / 255, 1)
-	-- 	love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
-	-- end
-
 	self.stateMachine:render()
 end
 

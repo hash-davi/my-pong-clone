@@ -15,10 +15,10 @@ function Paddle:init(position, dimensions, playable, side)
 
 	self.stateMachine = StateMachine({
 		["static"] = function()
-			return Static()
+			return Static(self)
 		end,
 		["dynamic"] = function()
-			return Dynamic()
+			return Dynamic(self)
 		end,
 	})
 	self.mode = "normal"
@@ -26,20 +26,13 @@ end
 
 function Paddle:load(info)
 	StageCharacters = info.stageCharacters
-	self.stateMachine:transitionTo(
-		"static",
-		{ stateMachine = self.stateMachine, parent = self, stageCharacters = StageCharacters }
-	)
+	self.stateMachine:transitionTo("static", {
+		stageCharacters = StageCharacters,
+	})
 end
 
 function Paddle:render()
-	-- self.stateMachine:render()
-	if self.mode == "stretched" then
-		love.graphics.setColor(241 / 255, 81 / 255, 82 / 255)
-	else
-		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
-	end
-	love.graphics.rectangle("fill", self.position.x, self.position.y, self.dimensions.width, self.dimensions.height)
+	self.stateMachine:render()
 end
 
 function Paddle:update(dt)
@@ -71,7 +64,8 @@ function Paddle:track(ball, dt)
 		self:setSpeed(-PLAYER_VELOCITY)
 		self:moveY(self.dy * dt * slowingFactor)
 	else
-		self:stop()
+		self:setSpeed(0)
+		self.stateMachine:transitionTo("static", { stageCharacters = StageCharacters })
 	end
 end
 
@@ -94,18 +88,15 @@ function Paddle:moveY(distanceY)
 	if distanceY ~= 0 then
 		if self:collidesAt(self.position.y + distanceY) then
 			self:stop()
-			self.stateMachine:transitionTo(
-				"static",
-				{ stateMachine = self.stateMachine, parent = self, stageCharacters = StageCharacters }
-			)
+			self.stateMachine:transitionTo("static", { stageCharacters = StageCharacters })
 		else
 			self.position.y = self.position.y + distanceY
 		end
 	end
 end
 
-function Paddle:collidesAt(position)
-	if position <= TOP_WALL or self.dimensions.height + position >= BOTTOM_WALL + 10 then
+function Paddle:collidesAt(positionY)
+	if positionY <= TOP_WALL or self.dimensions.height + positionY >= BOTTOM_WALL + 10 then
 		return true
 	end
 
@@ -118,5 +109,4 @@ end
 
 function Paddle:stop()
 	self.dy = 0
-	-- self.state = "static"
 end

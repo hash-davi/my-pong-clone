@@ -44,13 +44,13 @@ function Stage:init(characters)
 
 	self.stateMachine = StateMachine({
 		["select"] = function()
-			return Select()
+			return Select(self)
 		end,
 		["serve"] = function()
-			return Serve()
+			return Serve(self)
 		end,
 		["rally"] = function()
-			return Rally()
+			return Rally(self)
 		end,
 		["paused"] = function()
 			return Paused()
@@ -96,14 +96,36 @@ function Stage:activate(paddle)
 	paddle.playable = true
 end
 
+function Stage:modify(type)
+	self.mode = type
+
+	if self.mode == "normal" then
+		self.timers.cooldown = 0
+		slowingFactor = 1
+		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
+	elseif self.mode == "slower" then
+		slowingFactor = 0.5
+		love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
+	end
+end
+
 function Stage:render()
 	if self.mode == "slower" then
+		love.graphics.clear(30 / 255, 85 / 255, 92 / 255, 1)
 		love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
+	else
+		love.graphics.clear(58 / 255, 46 / 255, 57 / 255, 1)
+		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 	end
 
 	-- Court ------
 	love.graphics.rectangle("line", LEFT_ZONE - 2, TOP_WALL, RIGHT_ZONE - LEFT_ZONE + 4, BOTTOM_WALL - 5) -- Perimeter
 	love.graphics.rectangle("fill", VIRTUAL_WIDTH / 2 - 10, TOP_WALL, 1, BOTTOM_WALL - 5) -- Net line
+
+	-- DEBUG ------
+	-- love.graphics.setFont(Game_fonts["small"])
+	-- love.graphics.printf(self.characters.leftPaddle.dy, 0, 30, VIRTUAL_WIDTH / 2, "center")
+	-- love.graphics.printf(self.characters.rightPaddle.dy, VIRTUAL_WIDTH / 2, 30, VIRTUAL_WIDTH / 2, "center")
 
 	self.stateMachine:render()
 end

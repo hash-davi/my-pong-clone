@@ -1,8 +1,10 @@
 Serve = Class({ __includes = BaseState })
 
-function Serve:load(info)
-	self.parentStateMachine = info.stateMachine
+function Serve:init(stage)
+	self.stage = stage
+end
 
+function Serve:load(info)
 	self.server = info.server
 	self.timers = info.timers
 	self.mode = info.mode
@@ -17,32 +19,6 @@ end
 function Serve:update(dt)
 	self.characters.ball:reset()
 
-	-- Left paddle ------
-	if self.characters.leftPaddle.playable then
-		if love.keyboard.isDown("w") then
-			self.characters.leftPaddle:setSpeed(-PLAYER_VELOCITY)
-			self.characters.leftPaddle:moveY(self.characters.leftPaddle.dy * dt * slowingFactor)
-		elseif love.keyboard.isDown("s") then
-			self.characters.leftPaddle:setSpeed(PLAYER_VELOCITY)
-			self.characters.leftPaddle:moveY(self.characters.leftPaddle.dy * dt * slowingFactor)
-		else
-			self.characters.leftPaddle:stop()
-		end
-	end
-
-	-- Right Paddle ------
-	if self.characters.rightPaddle.playable then
-		if love.keyboard.isDown("up") then
-			self.characters.rightPaddle:setSpeed(-PLAYER_VELOCITY)
-			self.characters.rightPaddle:moveY(self.characters.rightPaddle.dy * dt * slowingFactor)
-		elseif love.keyboard.isDown("down") then
-			self.characters.rightPaddle:setSpeed(PLAYER_VELOCITY)
-			self.characters.rightPaddle:moveY(self.characters.rightPaddle.dy * dt * slowingFactor)
-		else
-			self.characters.rightPaddle:stop()
-		end
-	end
-
 	for i, paddle in pairs(self.paddles) do
 		paddle:update(dt)
 	end
@@ -54,8 +30,7 @@ function Serve:update(dt)
 	end
 
 	if love.keyboard.wasPressed("return") then
-		self.parentStateMachine:transitionTo("rally", {
-			stateMachine = self.parentStateMachine,
+		self.stage.stateMachine:transitionTo("rally", {
 			rallyTime = 0,
 			mode = self.mode,
 			score = self.score,
@@ -68,6 +43,7 @@ function Serve:update(dt)
 end
 
 function Serve:render()
+	love.graphics.setFont(Game_fonts["large"])
 	if self.server == 1 then
 		love.graphics.printf("Left's serve", 0, 30, VIRTUAL_WIDTH, "center")
 	elseif self.server == 2 then

@@ -1,8 +1,10 @@
 Select = Class({ __includes = BaseState })
 
-function Select:load(info)
-	self.parentStateMachine = info.stateMachine
+function Select:init(stage)
+	self.stage = stage
+end
 
+function Select:load(info)
 	self.timers = info.timers
 	self.mode = info.mode
 
@@ -14,37 +16,11 @@ end
 
 function Select:update(dt)
 	if love.keyboard.wasPressed("w") or love.keyboard.wasPressed("s") then
-		Stage:activate(self.characters.leftPaddle)
+		self.stage:activate(self.characters.leftPaddle)
 	end
 
 	if love.keyboard.wasPressed("up") or love.keyboard.wasPressed("down") then
-		Stage:activate(self.characters.rightPaddle)
-	end
-
-	-- Left Paddle ------
-	if self.characters.leftPaddle.playable then
-		if love.keyboard.isDown("w") then
-			self.characters.leftPaddle:setSpeed(-PLAYER_VELOCITY)
-			self.characters.leftPaddle:moveY(self.characters.leftPaddle.dy * dt * slowingFactor)
-		elseif love.keyboard.isDown("s") then
-			self.characters.leftPaddle:setSpeed(PLAYER_VELOCITY)
-			self.characters.leftPaddle:moveY(self.characters.leftPaddle.dy * dt * slowingFactor)
-		else
-			self.characters.leftPaddle:stop()
-		end
-	end
-
-	-- Right Paddle ------
-	if self.characters.rightPaddle.playable then
-		if love.keyboard.isDown("up") then
-			self.characters.rightPaddle:setSpeed(-PLAYER_VELOCITY)
-			self.characters.rightPaddle:moveY(self.characters.rightPaddle.dy * dt * slowingFactor)
-		elseif love.keyboard.isDown("down") then
-			self.characters.rightPaddle:setSpeed(PLAYER_VELOCITY)
-			self.characters.rightPaddle:moveY(self.characters.rightPaddle.dy * dt * slowingFactor)
-		else
-			self.characters.rightPaddle:stop()
-		end
+		self.stage:activate(self.characters.rightPaddle)
 	end
 
 	for i, paddle in pairs(self.paddles) do
@@ -52,8 +28,7 @@ function Select:update(dt)
 	end
 
 	if love.keyboard.wasPressed("return") then
-		self.parentStateMachine:transitionTo("serve", {
-			stateMachine = self.parentStateMachine,
+		self.stage.stateMachine:transitionTo("serve", {
 			server = 1,
 			mode = self.mode,
 			timers = self.timers,
