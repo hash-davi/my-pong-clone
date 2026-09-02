@@ -30,6 +30,7 @@ function Serve:update(dt)
 	end
 
 	if love.keyboard.wasPressed("return") then
+		self.characters.ball:serve()
 		self.stage.stateMachine:transitionTo("rally", {
 			rallyTime = 0,
 			mode = self.mode,

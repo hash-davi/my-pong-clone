@@ -36,6 +36,11 @@ function Rally:load(info)
 end
 
 function Rally:update(dt)
+	-- DEBUG ------
+	if love.keyboard.wasPressed("p") then
+		self.stage:modify("slower")
+	end
+
 	if self.stage.mode ~= "normal" then
 		self.timers.cooldown = self.timers.cooldown + dt
 
@@ -51,38 +56,55 @@ function Rally:update(dt)
 		paddle:update(dt)
 	end
 
-	self.characters.ball:setDx(self.characters.ball.dx)
-	self.characters.ball:moveX(self.characters.ball.dx * dt * slowingFactor)
-	self.characters.ball:setDy(self.characters.ball.dy)
-	self.characters.ball:moveY(self.characters.ball.dy * dt * slowingFactor)
-
 	-- self.characters.ball --------------
-	if self.characters.ball:collidesWith(self.characters.leftPaddle) then
-		self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
-		self.characters.ball:setDy(self.characters.ball.dy + self.characters.leftPaddle.dy / 2)
-		self.characters.ball:moveX(
-			self.characters.leftPaddle.position.x
-				+ self.characters.leftPaddle.dimensions.width
-				+ 1
-				- self.characters.ball.position.x
-		)
-		self.scorer = 1
+	for i, paddle in pairs(self.paddles) do
+		if self.characters.ball:collidesWith(paddle) then
+			self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
+			self.characters.ball:setDy(self.characters.ball.dy + paddle.dy / 2)
 
-		love.audio.play(Game_sounds["hit_sound"])
-	end
-	if self.characters.ball:collidesWith(self.characters.rightPaddle) then
-		self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
-		self.characters.ball:setDy(self.characters.ball.dy + self.characters.rightPaddle.dy / 2)
-		self.characters.ball:moveX(
-			self.characters.rightPaddle.position.x
-				- self.characters.ball.dimensions.width
-				- 1
-				- self.characters.ball.position.x
-		)
-		self.scorer = 2
+			if paddle.side == 1 then
+				self.characters.ball:moveX(
+					paddle.position.x + paddle.dimensions.width + 1 - self.characters.ball.position.x
+				)
+			else
+				self.characters.ball:moveX(
+					paddle.position.x - self.characters.ball.dimensions.width - 1 - self.characters.ball.position.x
+				)
+			end
 
-		love.audio.play(Game_sounds["hit_sound"])
+			self.scorer = paddle.side
+			love.audio.play(Game_sounds["hit_sound"])
+		end
 	end
+
+	self.characters.ball:update(dt)
+
+	-- if self.characters.ball:collidesWith(self.characters.leftPaddle) then
+	-- 	self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
+	-- 	self.characters.ball:setDy(self.characters.ball.dy + self.characters.leftPaddle.dy / 2)
+	-- 	self.characters.ball:moveX(
+	-- 		self.characters.leftPaddle.position.x
+	-- 			+ self.characters.leftPaddle.dimensions.width
+	-- 			+ 1
+	-- 			- self.characters.ball.position.x
+	-- 	)
+	-- 	self.scorer = 1
+	--
+	-- 	love.audio.play(Game_sounds["hit_sound"])
+	-- end
+	-- if self.characters.ball:collidesWith(self.characters.rightPaddle) then
+	-- 	self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
+	-- 	self.characters.ball:setDy(self.characters.ball.dy + self.characters.rightPaddle.dy / 2)
+	-- 	self.characters.ball:moveX(
+	-- 		self.characters.rightPaddle.position.x
+	-- 			- self.characters.ball.dimensions.width
+	-- 			- 1
+	-- 			- self.characters.ball.position.x
+	-- 	)
+	-- 	self.scorer = 2
+	--
+	-- 	love.audio.play(Game_sounds["hit_sound"])
+	-- end
 
 	for i, mod in pairs(self.modifiers) do
 		if self.characters.ball:collidesWith(mod) then
@@ -99,23 +121,6 @@ function Rally:update(dt)
 			table.remove(self.modifiers, i)
 		end
 	end
-
-	if
-		self.characters.ball.position.y + self.characters.ball.dimensions.height >= BOTTOM_WALL + 10
-		or self.characters.ball.position.y <= TOP_WALL
-	then
-		self.characters.ball:setDy(-self.characters.ball.dy)
-
-		if self.characters.ball.position.y + self.characters.ball.dimensions.height >= BOTTOM_WALL + 10 then
-			self.characters.ball:moveY(-1)
-		elseif self.characters.ball.position.y <= TOP_WALL then
-			self.characters.ball:moveY(1)
-		end
-
-		love.audio.play(Game_sounds["hit_sound"])
-	end
-
-	self.characters.ball:update(dt)
 
 	if self.timers.mod >= 10 and #self.modifiers <= 2 then
 		self.timers.mod = 0

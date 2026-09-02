@@ -104,7 +104,7 @@ function Stage:modify(type)
 		slowingFactor = 1
 		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 	elseif self.mode == "slower" then
-		slowingFactor = 0.5
+		slowingFactor = 0.2
 		love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
 	end
 end
@@ -123,9 +123,10 @@ function Stage:render()
 	love.graphics.rectangle("fill", VIRTUAL_WIDTH / 2 - 10, TOP_WALL, 1, BOTTOM_WALL - 5) -- Net line
 
 	-- DEBUG ------
-	-- love.graphics.setFont(Game_fonts["small"])
-	-- love.graphics.printf(self.characters.leftPaddle.dy, 0, 30, VIRTUAL_WIDTH / 2, "center")
-	-- love.graphics.printf(self.characters.rightPaddle.dy, VIRTUAL_WIDTH / 2, 30, VIRTUAL_WIDTH / 2, "center")
+	love.graphics.setFont(Game_fonts["small"])
+	love.graphics.printf(self.characters.leftPaddle.dy, 0, 30, VIRTUAL_WIDTH / 2, "center")
+	love.graphics.printf(self.characters.rightPaddle.dy, VIRTUAL_WIDTH / 2, 30, VIRTUAL_WIDTH / 2, "center")
+	love.graphics.printf(self.characters.ball.dy, -10, 60, VIRTUAL_WIDTH, "center")
 
 	self.stateMachine:render()
 end
