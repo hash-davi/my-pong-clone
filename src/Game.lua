@@ -1,13 +1,12 @@
 Game = Class({})
 
 -- Modules required ------------------------
-require("StateMachine")
-require("BaseState")
-require("StartScreen")
+require("src.StateMachine")
+require("src.BaseState")
 
-require("stages.stage.Stage")
-
-require("Menu")
+require("src.screens.StartScreen")
+require("src.screens.Menu")
+require("src.stages.stage.Stage")
 --------------------------------------------
 
 function showscore(player, x, y)

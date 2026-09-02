@@ -1,7 +1,7 @@
 Ball = Class({})
 
-require("characters.ball.BallStatic")
-require("characters.ball.BallDynamic")
+require("src.characters.ball.BallStatic")
+require("src.characters.ball.BallDynamic")
 
 function Ball:init(position, dimensions)
 	self.position = position

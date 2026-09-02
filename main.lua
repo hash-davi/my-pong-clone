@@ -1,16 +1,7 @@
 -- Modules importing and constants definitions -----------
 
-Class = require("libs.class")
-
-local push = require("libs.push")
-
-require("Game")
-
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-
-VIRTUAL_WIDTH = 432
-VIRTUAL_HEIGHT = 243
+require("src.Dependencies")
+require("src.Constants")
 
 ----------------------------------------------------------
 
@@ -23,11 +14,6 @@ function love.keypressed(key)
 end
 
 function love.keyboard.wasPressed(key)
-	-- if love.keysPressed[key] then
-	-- 	return true
-	-- else
-	-- 	return false
-	-- end
 	return love.keyboard.keysPressed[key]
 end
 
@@ -50,7 +36,7 @@ function love.load()
 		fullscreen = false,
 	})
 
-	push.setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, { upscale = "normal" })
+	Push.setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, { upscale = "normal" })
 	----------------------------------------------------
 
 	-- Game instantiation ------------------------------
@@ -71,11 +57,11 @@ end
 
 -- Render -------------------
 function love.draw()
-	push.start()
+	Push.start()
 
 	Game:render()
 
-	push.finish()
+	Push.finish()
 end
 
 ----------------------------------------------------------

@@ -1,14 +1,14 @@
-Dynamic = Class({ __includes = BaseState })
+PaddleDynamic = Class({ __includes = BaseState })
 
-function Dynamic:init(paddle)
+function PaddleDynamic:init(paddle)
 	self.paddle = paddle
 end
 
-function Dynamic:load(info)
+function PaddleDynamic:load(info)
 	self.stageCharacters = info.stageCharacters
 end
 
-function Dynamic:update(dt)
+function PaddleDynamic:update(dt)
 	if self.paddle.side == 1 then
 		self:leftControl(dt)
 	elseif self.paddle.side == 2 then
@@ -16,7 +16,7 @@ function Dynamic:update(dt)
 	end
 end
 
-function Dynamic:leftControl(dt)
+function PaddleDynamic:leftControl(dt)
 	if self.paddle.playable then
 		if love.keyboard.isDown("w") then
 			self.paddle:setSpeed(-PLAYER_VELOCITY)
@@ -42,7 +42,7 @@ function Dynamic:leftControl(dt)
 	end
 end
 
-function Dynamic:rightControl(dt)
+function PaddleDynamic:rightControl(dt)
 	if self.paddle.playable then
 		if love.keyboard.isDown("up") then
 			self.paddle:setSpeed(-PLAYER_VELOCITY)
@@ -68,7 +68,7 @@ function Dynamic:rightControl(dt)
 	end
 end
 
-function Dynamic:render()
+function PaddleDynamic:render()
 	if self.paddle.mode == "stretched" then
 		love.graphics.setColor(241 / 255, 81 / 255, 82 / 255)
 	else

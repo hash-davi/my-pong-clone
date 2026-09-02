@@ -1,29 +1,14 @@
 Stage = Class({ __includes = BaseState })
 
-require("stages.stage.Select")
-require("stages.stage.Serve")
-require("stages.stage.Rally")
-require("stages.stage.Result")
+require("src.stages.stage.Select")
+require("src.stages.stage.Serve")
+require("src.stages.stage.Rally")
+require("src.stages.stage.Result")
 
-require("characters.paddle.Paddle")
-require("characters.ball.Ball")
+require("src.characters.paddle.Paddle")
+require("src.characters.ball.Ball")
 
-require("Modifier")
-
-VIRTUAL_WIDTH = 432
-VIRTUAL_HEIGHT = 243
-
-TOP_WALL = 15
-BOTTOM_WALL = VIRTUAL_HEIGHT - 25
-
-LEFT_ZONE = 10
-RIGHT_ZONE = VIRTUAL_WIDTH - 10
-
-PADDLE_WIDTH = 10
-PADDLE_HEIGHT = 30
-
-PLAYER_VELOCITY = 200
-BALL_DX = 100
+require("src.modifiers.Modifier")
 
 slowingFactor = 1
 

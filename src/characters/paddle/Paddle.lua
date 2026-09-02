@@ -1,7 +1,7 @@
 Paddle = Class({})
 
-require("characters.paddle.Static")
-require("characters.paddle.Dynamic")
+require("src.characters.paddle.PaddleStatic")
+require("src.characters.paddle.PaddleDynamic")
 
 function Paddle:init(position, dimensions, playable, side)
 	self.position = position
@@ -15,10 +15,10 @@ function Paddle:init(position, dimensions, playable, side)
 
 	self.stateMachine = StateMachine({
 		["static"] = function()
-			return Static(self)
+			return PaddleStatic(self)
 		end,
 		["dynamic"] = function()
-			return Dynamic(self)
+			return PaddleDynamic(self)
 		end,
 	})
 	self.mode = "normal"

@@ -1,14 +1,14 @@
-Static = Class({ __includes = BaseState })
+PaddleStatic = Class({ __includes = BaseState })
 
-function Static:init(paddle)
+function PaddleStatic:init(paddle)
 	self.paddle = paddle
 end
 
-function Static:load(info)
+function PaddleStatic:load(info)
 	self.stageCharacters = info.stageCharacters
 end
 
-function Static:update(dt)
+function PaddleStatic:update(dt)
 	if self.paddle.side == 1 then
 		self:leftControl()
 	else
@@ -16,7 +16,7 @@ function Static:update(dt)
 	end
 end
 
-function Static:leftControl()
+function PaddleStatic:leftControl()
 	if self.paddle.playable then
 		if love.keyboard.isDown("w") or love.keyboard.isDown("s") then
 			self.paddle.stateMachine:transitionTo("dynamic", {
@@ -30,7 +30,7 @@ function Static:leftControl()
 	end
 end
 
-function Static:rightControl()
+function PaddleStatic:rightControl()
 	if self.paddle.playable then
 		if love.keyboard.isDown("up") or love.keyboard.isDown("down") then
 			self.paddle.stateMachine:transitionTo("dynamic", {
@@ -44,7 +44,7 @@ function Static:rightControl()
 	end
 end
 
-function Static:render()
+function PaddleStatic:render()
 	if self.paddle.mode == "stretched" then
 		love.graphics.setColor(241 / 255, 81 / 255, 82 / 255)
 	else
