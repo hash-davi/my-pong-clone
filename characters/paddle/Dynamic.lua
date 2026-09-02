@@ -31,7 +31,7 @@ function Dynamic:leftControl(dt)
 			})
 		end
 	else
-		if self.stageCharacters.ball.dx < 0 and self.stageCharacters.ball.position.x <= VIRTUAL_WIDTH / 2 then
+		if self.stageCharacters.ball.dx < 0 and self.stageCharacters.ball.position.x < VIRTUAL_WIDTH / 2 then
 			self.paddle:track(self.stageCharacters.ball, dt)
 		else
 			self.paddle:setSpeed(0)

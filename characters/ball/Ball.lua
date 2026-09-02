@@ -1,6 +1,7 @@
 Ball = Class({})
 
-require("characters.ball.Ball_Static")
+require("characters.ball.BallStatic")
+require("characters.ball.BallDynamic")
 
 function Ball:init(position, dimensions)
 	self.position = position
@@ -9,14 +10,16 @@ function Ball:init(position, dimensions)
 	self.dx = BALL_DX
 	self.dy = math.random(-100, 100)
 
+	self.served = false
+
 	self.cooldown = 0
 
 	self.stateMachine = StateMachine({
 		["static"] = function()
-			return Ball_Static()
+			return BallStatic(self)
 		end,
 		["dynamic"] = function()
-			return Dynamic()
+			return BallDynamic(self)
 		end,
 	})
 	self.mode = "normal"
@@ -24,13 +27,12 @@ end
 
 function Ball:load(info)
 	StageCharacters = info.stageCharacters
-	self.stateMachine:transitionTo(
-		"static",
-		{ stateMachine = self.stateMachine, parent = self, stageCharacters = StageCharacters }
-	)
+	self.stateMachine:transitionTo("static", { stageCharacters = StageCharacters })
 end
 
 function Ball:update(dt)
+	self.stateMachine:update(dt)
+
 	if self.mode ~= "normal" then
 		self.cooldown = self.cooldown + dt
 
@@ -41,7 +43,7 @@ function Ball:update(dt)
 end
 
 function Ball:render()
-	love.graphics.rectangle("fill", self.position.x, self.position.y, self.dimensions.width, self.dimensions.height)
+	self.stateMachine:render()
 end
 
 function Ball:collidesWith(paddle)
@@ -63,11 +65,15 @@ function Ball:collidesWith(paddle)
 end
 
 function Ball:reset()
-	self.position.x = 201
-	self.position.y = VIRTUAL_HEIGHT / 2
+	self.position = {
+		x = 201,
+		y = VIRTUAL_HEIGHT / 2,
+	}
 	self.dx = BALL_DX
 	self.dy = math.random(-100, 100)
-	-- self.state = "static"
+	self.served = false
+
+	self.stateMachine:transitionTo("static", { stageCharacters = StageCharacters })
 end
 
 function Ball:modify(type)
@@ -79,25 +85,25 @@ function Ball:modify(type)
 end
 
 function Ball:moveX(distanceX)
-	-- self.state = "moving"
-
 	if distanceX ~= 0 then
 		self.position.x = self.position.x + distanceX
 	end
 end
 
 function Ball:moveY(distanceY)
-	-- self.state = "moving"
-
 	if distanceY ~= 0 then
 		self.position.y = self.position.y + distanceY
 	end
 end
 
 function Ball:setDx(speed)
-	self.dx = math.min(speed)
+	self.dx = speed > 0 and math.min(speed, BALL_DX * 2) or math.max(speed, -BALL_DX * 2)
 end
 
 function Ball:setDy(speed)
-	self.dy = math.min(speed, BALL_DX * 2)
+	self.dy = speed > 0 and math.min(speed, BALL_DX * 2) or math.max(speed, -BALL_DX * 2)
+end
+
+function Ball:serve()
+	self.served = true
 end
