@@ -55,9 +55,9 @@ function Game:load()
 	self.stateMachine:transitionTo("start")
 
 	Game_fonts = {
-		["large"] = love.graphics.newFont("font.ttf", 32),
-		["medium"] = love.graphics.newFont("font.ttf", 24),
-		["small"] = love.graphics.newFont("font.ttf", 16),
+		["large"] = love.graphics.newFont("fonts/font.ttf", 32),
+		["medium"] = love.graphics.newFont("fonts/font.ttf", 24),
+		["small"] = love.graphics.newFont("fonts/font.ttf", 16),
 	}
 
 	Game_sounds = {
