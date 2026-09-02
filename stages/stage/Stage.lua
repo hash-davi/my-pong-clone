@@ -79,7 +79,6 @@ function Stage:load()
 	end
 
 	self.stateMachine:transitionTo("select", {
-		stateMachine = self.stateMachine,
 		mode = self.mode,
 		score = self.score,
 		timers = self.timers,
@@ -104,7 +103,7 @@ function Stage:modify(type)
 		slowingFactor = 1
 		love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 	elseif self.mode == "slower" then
-		slowingFactor = 0.2
+		slowingFactor = 0.5
 		love.graphics.setColor(93 / 255, 211 / 255, 158 / 255)
 	end
 end

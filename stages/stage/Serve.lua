@@ -7,18 +7,17 @@ end
 function Serve:load(info)
 	self.server = info.server
 	self.timers = info.timers
-	self.mode = info.mode
 
 	self.score = info.score
 
 	self.modifiers = info.modifiers
-	self.characters = info.characters
-	self.paddles = info.paddles
+	self.characters = self.stage.characters
+	self.paddles = self.stage.paddles
+
+	self.characters.ball:reset()
 end
 
 function Serve:update(dt)
-	self.characters.ball:reset()
-
 	for i, paddle in pairs(self.paddles) do
 		paddle:update(dt)
 	end
@@ -33,17 +32,15 @@ function Serve:update(dt)
 		self.characters.ball:serve()
 		self.stage.stateMachine:transitionTo("rally", {
 			rallyTime = 0,
-			mode = self.mode,
 			score = self.score,
 			modifiers = self.modifiers,
-			characters = self.characters,
-			paddles = self.paddles,
 			timers = self.timers,
 		})
 	end
 end
 
 function Serve:render()
+	love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 	love.graphics.setFont(Game_fonts["large"])
 	if self.server == 1 then
 		love.graphics.printf("Left's serve", 0, 30, VIRTUAL_WIDTH, "center")

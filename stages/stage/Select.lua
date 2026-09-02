@@ -6,12 +6,11 @@ end
 
 function Select:load(info)
 	self.timers = info.timers
-	self.mode = info.mode
 
 	self.score = info.score
 
-	self.characters = info.characters
-	self.paddles = info.paddles
+	self.characters = self.stage.characters
+	self.paddles = self.stage.paddles
 end
 
 function Select:update(dt)
@@ -30,12 +29,9 @@ function Select:update(dt)
 	if love.keyboard.wasPressed("return") then
 		self.stage.stateMachine:transitionTo("serve", {
 			server = 1,
-			mode = self.mode,
 			timers = self.timers,
 			score = self.score,
 			modifiers = {},
-			characters = self.characters,
-			paddles = self.paddles,
 		})
 	end
 end

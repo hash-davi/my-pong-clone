@@ -19,6 +19,7 @@ function showscore(player, x, y)
 		score = Game.stateMachine.currentState.score.right
 	end
 
+	love.graphics.setColor(244 / 255, 216 / 255, 205 / 255)
 	love.graphics.setFont(Game_fonts["large"])
 	love.graphics.print(tostring(score), x, y)
 end
@@ -45,7 +46,7 @@ function Game:init()
 					false,
 					2
 				),
-				ball = Ball({ x = 201, y = VIRTUAL_HEIGHT / 2 }, { width = 10, height = 10 }),
+				ball = Ball({ x = VIRTUAL_WIDTH / 2 - 15, y = VIRTUAL_HEIGHT / 2 }, { width = 10, height = 10 }),
 			})
 		end,
 	})

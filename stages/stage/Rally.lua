@@ -24,15 +24,14 @@ end
 
 function Rally:load(info)
 	self.time = info.rallyTime
-	self.mode = info.mode
 	self.timers = info.timers
 	self.scorer = info.server
 
 	self.score = info.score
 
 	self.modifiers = info.modifiers
-	self.characters = info.characters
-	self.paddles = info.paddles
+	self.characters = self.stage.characters
+	self.paddles = self.stage.paddles
 end
 
 function Rally:update(dt)
@@ -56,7 +55,9 @@ function Rally:update(dt)
 		paddle:update(dt)
 	end
 
-	-- self.characters.ball --------------
+	self.characters.ball:update(dt)
+
+	-- Paddle vs Ball collision handling --------------
 	for i, paddle in pairs(self.paddles) do
 		if self.characters.ball:collidesWith(paddle) then
 			self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
@@ -77,35 +78,7 @@ function Rally:update(dt)
 		end
 	end
 
-	self.characters.ball:update(dt)
-
-	-- if self.characters.ball:collidesWith(self.characters.leftPaddle) then
-	-- 	self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
-	-- 	self.characters.ball:setDy(self.characters.ball.dy + self.characters.leftPaddle.dy / 2)
-	-- 	self.characters.ball:moveX(
-	-- 		self.characters.leftPaddle.position.x
-	-- 			+ self.characters.leftPaddle.dimensions.width
-	-- 			+ 1
-	-- 			- self.characters.ball.position.x
-	-- 	)
-	-- 	self.scorer = 1
-	--
-	-- 	love.audio.play(Game_sounds["hit_sound"])
-	-- end
-	-- if self.characters.ball:collidesWith(self.characters.rightPaddle) then
-	-- 	self.characters.ball:setDx(-self.characters.ball.dx * 1.05)
-	-- 	self.characters.ball:setDy(self.characters.ball.dy + self.characters.rightPaddle.dy / 2)
-	-- 	self.characters.ball:moveX(
-	-- 		self.characters.rightPaddle.position.x
-	-- 			- self.characters.ball.dimensions.width
-	-- 			- 1
-	-- 			- self.characters.ball.position.x
-	-- 	)
-	-- 	self.scorer = 2
-	--
-	-- 	love.audio.play(Game_sounds["hit_sound"])
-	-- end
-
+	-- Ball vs Modifier collision handling ------------
 	for i, mod in pairs(self.modifiers) do
 		if self.characters.ball:collidesWith(mod) then
 			if modRanges[mod.type] == "paddle" then
@@ -122,7 +95,7 @@ function Rally:update(dt)
 		end
 	end
 
-	if self.timers.mod >= 10 and #self.modifiers <= 2 then
+	if self.timers.mod >= 10 and #self.modifiers < 3 then
 		self.timers.mod = 0
 		table.insert(self.modifiers, Modifier(modTypes[math.random(#modTypes)]))
 	end
@@ -137,11 +110,8 @@ function Rally:update(dt)
 		self.stage.stateMachine:transitionTo("serve", {
 			server = self.scorer,
 			timers = self.timers,
-			mode = self.mode,
 			score = self.score,
 			modifiers = self.modifiers,
-			characters = self.characters,
-			paddles = self.paddles,
 		})
 	elseif self.characters.ball.position.x > RIGHT_ZONE - self.characters.rightPaddle.dimensions.width then
 		self.scorer = 1
@@ -152,11 +122,8 @@ function Rally:update(dt)
 		self.stage.stateMachine:transitionTo("serve", {
 			server = self.scorer,
 			timers = self.timers,
-			mode = self.mode,
 			score = self.score,
 			modifiers = self.modifiers,
-			characters = self.characters,
-			paddles = self.paddles,
 		})
 	end
 

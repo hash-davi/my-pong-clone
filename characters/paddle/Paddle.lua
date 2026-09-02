@@ -48,19 +48,20 @@ function Paddle:update(dt)
 end
 
 function Paddle:track(ball, dt)
-	local ball_sx = self.position.x - (ball.position.x + ball.dimensions.width)
-	local ball_dt = (ball.dx / ball_sx) * dt
+	local ballSx = self.side == 1 and ball.position.x - (self.position.x + self.dimensions.width)
+		or self.position.x - (ball.position.x + ball.dimensions.width)
+	local ball_dt = self.side == 1 and (-ball.dx / ballSx) * dt or (ball.dx / ballSx) * dt
 
-	local ball_sy = ball.dy * ball_dt
-	local final_position = {
-		x = ball.position.x + ball.dimensions.width + ball_sx,
-		y = ball.position.y + ball.dimensions.height + ball_sy,
+	local ballSy = ball.dy * ball_dt
+	local finalPosition = {
+		x = self.side == 1 and ball.position.x - ballSx or ball.position.x + ball.dimensions.width + ballSx,
+		y = ball.dy > 0 and ball.position.y + ball.dimensions.height + ballSy or ball.position.y + ballSy,
 	}
 
-	if final_position.y > self.position.y + self.dimensions.height then -- If the ball will fall below the paddle
+	if finalPosition.y > self.position.y + (self.dimensions.height * 3) / 4 then -- If the ball will fall below the paddle
 		self:setSpeed(PLAYER_VELOCITY)
 		self:moveY(self.dy * dt * slowingFactor)
-	elseif final_position.y < self.position.y then -- If the ball will fall above the paddle
+	elseif finalPosition.y < self.position.y + self.dimensions.height / 4 then -- If the ball will fall above the paddle
 		self:setSpeed(-PLAYER_VELOCITY)
 		self:moveY(self.dy * dt * slowingFactor)
 	else

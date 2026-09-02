@@ -8,7 +8,7 @@ function Ball:init(position, dimensions)
 	self.dimensions = dimensions
 
 	self.dx = BALL_DX
-	self.dy = math.random(-100, 100)
+	self.dy = math.random(-BALL_DX, BALL_DX)
 
 	self.served = false
 
@@ -66,11 +66,11 @@ end
 
 function Ball:reset()
 	self.position = {
-		x = 201,
+		x = VIRTUAL_WIDTH / 2 - self.dimensions.width / 2 - 10,
 		y = VIRTUAL_HEIGHT / 2,
 	}
 	self.dx = BALL_DX
-	self.dy = math.random(-100, 100)
+	self.dy = math.random(-BALL_DX, BALL_DX)
 	self.served = false
 
 	self.stateMachine:transitionTo("static", { stageCharacters = StageCharacters })
@@ -97,7 +97,7 @@ function Ball:moveY(distanceY)
 end
 
 function Ball:setDx(speed)
-	self.dx = speed > 0 and math.min(speed, BALL_DX * 2) or math.max(speed, -BALL_DX * 2)
+	self.dx = speed > 0 and math.min(speed, BALL_DX * 4) or math.max(speed, -BALL_DX * 4)
 end
 
 function Ball:setDy(speed)
